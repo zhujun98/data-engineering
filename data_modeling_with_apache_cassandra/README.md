@@ -1,7 +1,7 @@
 # Data Modeling with Apache Cassandra
 
 
-## Dependencies
+## Installing dependencies
 
 ```sh
 pip install pandas cassandra-drive
@@ -11,14 +11,14 @@ pip install pandas cassandra-drive
 ## Running Cassandra locally
 
 ```sh
-# Create a Docker network.
+# Creat a Docker network.
 docker network create cassandra-cluster-network
 
 # Pull Apache Cassandra image from DockerHub.
 docker pull cassandra
 
-# Start a Cassandra node
-docker run -d --name cassandra-node-1 --network cassandra-cluster-network -p 127.0.0.1:9042:9042 cassandra
+# Start a Cassandra node.
+docker run --name cassandra-node-1 --network cassandra-cluster-network -p 127.0.0.1:9042:9042 -d cassandra
 ```
 
 ## Getting started
