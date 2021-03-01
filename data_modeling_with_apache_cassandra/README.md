@@ -1,5 +1,8 @@
 # Data Modeling with Apache Cassandra
 
+Jun Zhu
+___
+
 A startup called Sparkify wants to analyze the data they've been collecting 
 on songs and user activity on their new music streaming app. The analysis 
 team is particularly interested in understanding **what songs users are 
