@@ -1,5 +1,8 @@
 # Data Modeling with PostgreSQL
 
+Jun Zhu
+___
+
 A startup called Sparkify wants to analyze the data they've been collecting on 
 songs and user activity on their new music streaming app. The analytics team is 
 particularly interested in understanding what songs users are listening to. 
@@ -8,7 +11,7 @@ directory of JSON logs on user activity on the app, as well as a directory with
 JSON metadata on the songs in their app.
 
 They'd like a data engineer to create a Postgres database with tables designed 
-to optimize queries on song play analysis, and bring you on the project. Your 
+to optimize queries on **song play analysis**, and bring you on the project. Your 
 role is to create a database schema and ETL pipeline for this analysis. You'll 
 be able to test your database and ETL pipeline by running queries given to you 
 by the analytics team from Sparkify and compare your results with their 
@@ -42,6 +45,27 @@ and month. For example, here are filepaths to two files in this dataset.
 log_data/2018/11/2018-11-12-events.json
 log_data/2018/11/2018-11-13-events.json
 ```
+## Schema for song play analysis
+
+A star schema is employed to facilitate queries on song play analysis.
+
+### Fact table
+
+- **songplays** - records in log data associated with song plays, i.e. 
+  records with page NextSong, *songplay_id*, *start_time*, *user_id*, *level*, 
+  *song_id*, *artist_id*, *session_id*, *location*, *user_agent*
+
+### Dimension tables
+
+- **users** - users in the app *user_id*, *first_name*, *last_name*, *gender*, 
+  *level*
+- **songs** - songs in music database *song_id*, *title*, *artist_id*, *year*, 
+  *duration*
+- **artists** - artists in music database *artist_id*, *name*, *location*, 
+  *latitude*, *longitude*
+- **time** - timestamps of records in songplays broken down into specific units 
+  *start_time*, *hour*, *day*, *week*, *month*, *year*, *weekday*
+  
 
 ## Installing dependencies
 
@@ -64,23 +88,16 @@ docker start <CONTAINER ID>
 
 ## Getting started
 
+Create tables in the `sparkifydb` database. The old tables will be dropped.
+```sh
+python create_tables.py
+```
 
-## Schema for song play analysis
+Read and process files from `song_data` and `log_data`, and then load them
+into the tables.
+```sh
+python etl.py
+```
 
-### Fact table
-
-- **songplays** - records in log data associated with song plays, i.e. 
-  records with page NextSong, *songplay_id*, *start_time*, *user_id*, *level*, 
-  *song_id*, *artist_id*, *session_id*, *location*, *user_agent*
-
-### Dimension tables
-
-- **users** - users in the app *user_id*, *first_name*, *last_name*, *gender*, 
-  *level*
-- **songs** - songs in music database *song_id*, *title*, *artist_id*, *year*, 
-  *duration*
-- **artists** - artists in music database *artist_id*, *name*, *location*, 
-  *latitude*, *longitude*
-- **time** - timestamps of records in songplays broken down into specific units 
-  *start_time*, *hour*, *day*, *week*, *month*, *year*, *weekday*
-  
+One can also do the exploratory data analysis with the ETL pipeline in 
+this [notebook](./etl.ipynb).

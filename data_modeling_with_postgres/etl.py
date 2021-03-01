@@ -4,7 +4,9 @@ import psycopg2
 import pandas as pd
 from sql_queries import (
     song_table_insert, artist_table_insert, time_table_insert,
-    user_table_insert, songplay_table_insert
+    user_table_insert, song_select, songplay_table_insert,
+    song_table_check, artist_table_check, time_table_check,
+    user_table_check, songplay_table_check
 )
 
 
@@ -32,7 +34,8 @@ def process_log_file(cur, filepath):
     df = df[df['page'] == 'NextSong']
 
     # convert timestamp column to datetime
-    t = pd.to_datetime(df['ts'], unit='ms')
+    df['ts'] = pd.to_datetime(df['ts'], unit='ms')
+    t = df['ts']
 
     # insert time data records
     dt = t.dt
@@ -53,21 +56,25 @@ def process_log_file(cur, filepath):
     for i, row in user_df.iterrows():
         cur.execute(user_table_insert, row)
 
-    # # insert songplay records
-    # for index, row in df.iterrows():
-    #
-    #     # get songid and artistid from song and artist tables
-    #     cur.execute(song_select, (row.song, row.artist, row.length))
-    #     results = cur.fetchone()
-    #
-    #     if results:
-    #         songid, artistid = results
-    #     else:
-    #         songid, artistid = None, None
-    #
-    #     # insert songplay record
-    #     songplay_data =
-    #     cur.execute(songplay_table_insert, songplay_data)
+    # insert songplay records
+    for _, row in df.iterrows():
+        # get song_id and artist_id from the song and artist tables
+        cur.execute(song_select, (row.song, row.artist, row.length))
+        results = cur.fetchone()
+
+        if results:
+            song_id, artist_id = results
+        else:
+            song_id, artist_id = None, None
+
+        # insert songplay record
+        songplay_data = (
+            row['ts'], row['userId'], row['level'], song_id, artist_id,
+            row['sessionId'], row['location'], row['userAgent']
+        )
+
+        cur.execute(songplay_table_insert, songplay_data)
+        conn.commit()
 
 
 def process_data(cur, conn, directory, func):
@@ -86,6 +93,23 @@ def process_data(cur, conn, directory, func):
         print('{}/{} files processed.'.format(i, num_files))
 
 
+def run_test_queries():
+    """Check results by querying all the tables."""
+    for name, query in [('song', song_table_check),
+                        ('artist', artist_table_check),
+                        ('time', time_table_check),
+                        ('user', user_table_check),
+                        ('songplay', songplay_table_check)]:
+        cur.execute(query)
+        print(f"Query result of {name} table:")
+        for row in cur.fetchall():
+            print(row)
+
+    cur.execute("SELECT COUNT(*) FROM songplays")
+    print(f"Total number of records in the 'songplays' table is "
+          f"{cur.fetchone()[0]}")
+
+
 if __name__ == "__main__":
     conn = psycopg2.connect(
         "host=127.0.0.1 dbname=sparkifydb user=student password=student")
@@ -93,5 +117,7 @@ if __name__ == "__main__":
 
     process_data(cur, conn, directory='data/song_data', func=process_song_file)
     process_data(cur, conn, directory='data/log_data', func=process_log_file)
+
+    run_test_queries()
 
     conn.close()
