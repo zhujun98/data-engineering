@@ -52,3 +52,9 @@ docker start <CONTAINER ID>
 ## Getting started
 
 Please follow this [Jupyter notebook](./data_modeling_with_apache_cassandra.ipynb).
+
+## More readings
+
+- [Understanding Cassandra’s data model and Cassandra Query Language (CQL)](https://www.oreilly.com/library/view/cassandra-the-definitive/9781491933657/ch04.html)
+- [Designing a Cassandra Data Model](https://shermandigital.com/blog/designing-a-cassandra-data-model/)
+- [Cassandra data modeling: The primary key](https://www.datastax.com/blog/most-important-thing-know-cassandra-data-modeling-primary-key)
