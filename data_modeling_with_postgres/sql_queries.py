@@ -8,11 +8,14 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 
 # CREATE TABLES
 
+# About the NOT NULL constraint:
+#   https://www.postgresqltutorial.com/postgresql-not-null-constraint/
+
 songplay_table_create = ("""
     CREATE TABLE IF NOT EXISTS songplays
     (songplay_id SERIAL PRIMARY KEY,
-     start_time timestamp,
-     user_id int,
+     start_time timestamp NOT NULL,
+     user_id int NOT NULL,
      level varchar,
      song_id varchar,
      artist_id varchar,
@@ -27,13 +30,13 @@ user_table_create = ("""
      first_name varchar,
      last_name varchar,
      gender char (1),
-     level varchar)
+     level varchar NOT NULL)
 """)
 
 song_table_create = ("""
     CREATE TABLE IF NOT EXISTS songs
     (song_id varchar PRIMARY KEY,
-     title varchar,
+     title varchar NOT NULL,
      artist_id varchar,
      year int,
      duration numeric)
@@ -42,7 +45,7 @@ song_table_create = ("""
 artist_table_create = ("""
     CREATE TABLE IF NOT EXISTS artists
     (artist_id varchar PRIMARY KEY, 
-     artist_name varchar, 
+     artist_name varchar NOT NULL, 
      artist_location varchar, 
      artist_latitude numeric, 
      artist_longitude numeric)
@@ -62,6 +65,9 @@ time_table_create = ("""
 
 # INSERT RECORDS
 
+# About INSERT ON CONFLICT statement
+#   https://www.postgresqltutorial.com/postgresql-upsert/
+
 # songplay_id is assigned automatically
 songplay_table_insert = ("""
     INSERT INTO songplays
@@ -73,7 +79,7 @@ user_table_insert = ("""
     INSERT INTO users
     (user_id, first_name, last_name, gender, level)
     VALUES (%s, %s, %s, %s, %s)
-    ON CONFLICT (user_id) DO NOTHING
+    ON CONFLICT (user_id) DO UPDATE SET level = EXCLUDED.level
 """)
 
 song_table_insert = ("""
