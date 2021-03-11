@@ -1,6 +1,7 @@
 """
 Author: Jun Zhu
 """
+import configparser
 import pprint
 import time
 
@@ -72,4 +73,4 @@ def delete_redshift_cluster(identifier='dwhCluster'):
 if __name__ == "__main__":
     create_redshift_cluster()
 
-    delete_redshift_cluster()
+    # delete_redshift_cluster()
