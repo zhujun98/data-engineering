@@ -10,9 +10,9 @@ and want to move their processes and data onto the cloud. Their data resides in
 S3, in a directory of JSON logs on user activity on the app, as well as a 
 directory with JSON metadata on the songs in their app.
 
-As their data engineer, you are tasked with building an ETL pipeline that 
+As their data engineer, you are tasked with **building an ETL pipeline that 
 extracts their data from S3, stages them in Redshift, and transforms data into 
-a set of dimensional tables for their analytics team to continue finding 
+a set of dimensional tables** for their analytics team to continue finding 
 insights in what songs their users are listening to. You'll be able to test 
 your database and ETL pipeline by running queries given to you by the analytics 
 team from Sparkify and compare your results with their expected results.
@@ -27,10 +27,12 @@ format and contains metadata about a song and the artist of that song. The
 files are partitioned by the first three letters of each song's track ID. 
 For example, here are filepaths to two files in this dataset.
 
-```angular2html
-song_data/A/B/C/TRABCEI128F424C983.json
-song_data/A/A/B/TRAABJL12903CDCF1A.json
+```sh
+song_data/A/A/A/TRAAAAK128F9318786.json
+song_data/A/B/R/TRABRLW128F930321D.json
 ```
+
+There are 999 JSON files in total.
 
 ### Log dataset
 
@@ -41,10 +43,12 @@ activity logs from a music streaming app based on specified configurations.
 The log files in the dataset you'll be working with are partitioned by year 
 and month. For example, here are filepaths to two files in this dataset.
 
-```angular2html
-log_data/2018/11/2018-11-12-events.json
-log_data/2018/11/2018-11-13-events.json
+```sh
+log_data/2018/11/2018-11-01-events.json
+log_data/2018/11/2018-11-30-events.json
 ```
+
+There are 30 JSON files and 8056 records in total.
 
 
 ## Schema for song play analysis
@@ -86,4 +90,27 @@ pip install boto3
 
 ## Getting started
 
+Start a Redshift cluster 
+```sh
+python run_on_aws.py
+```
 
+Print a summary of data on S3 (optional)
+```sh
+python summarize_data.py
+```
+
+Initialize all tables
+```sh
+python create_tables.py
+```
+
+Run the ETL pipeline
+```sh
+python etl.py
+```
+
+Delete the Redshift cluster
+```sh
+python run_on_aws.py --delete
+```

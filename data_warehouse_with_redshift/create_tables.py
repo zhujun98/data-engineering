@@ -1,17 +1,14 @@
-import configparser
-
 import psycopg2
-from run_on_aws import get_redshift_cluster_endpoint
-from sql_queries import create_table_queries, drop_table_queries
+
+from run_on_aws import cluster_config, get_redshift_cluster_endpoint
+from sql_queries import (
+    create_table_queries, drop_table_queries, tables_check
+)
 
 
 def connect_db():
     """Connects to the database."""
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    cluster_config = config['CLUSTER']
-
-    address, port = get_redshift_cluster_endpoint(cluster_config['IDENTIFIER'])
+    address, port = get_redshift_cluster_endpoint()
     # connect to default database
     print(f"Connecting to Redshift cluster at {address}:{port} ...")
     conn = psycopg2.connect(
@@ -35,17 +32,22 @@ def drop_tables(cur, conn):
 def create_tables(cur, conn):
     """Creates each table using the queries in `create_table_queries` list."""
     for query in create_table_queries:
-        try:
-            cur.execute(query)
-            conn.commit()
-        except Exception as e:
-            print(repr(e))
+        cur.execute(query)
+        conn.commit()
+
+    cur.execute(tables_check)
+    print("Tables in the database:")
+    for row in cur.fetchall():
+        print(" - ", row[0])
 
 
 if __name__ == "__main__":
     cur, conn = connect_db()
 
-    # drop_tables(cur, conn)
-    # create_tables(cur, conn)
+    try:
+        drop_tables(cur, conn)
+        create_tables(cur, conn)
+    except Exception as e:
+        print(repr(e))
 
     conn.close()

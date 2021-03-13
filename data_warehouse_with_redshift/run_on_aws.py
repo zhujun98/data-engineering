@@ -1,6 +1,7 @@
 """
 Author: Jun Zhu
 """
+import argparse
 import configparser
 import pprint
 import time
@@ -8,27 +9,23 @@ import time
 import boto3
 from botocore.exceptions import ClientError
 
-
-def create_s3_client():
-    s3_client = boto3.client('s3')
-
-    response = s3_client.list_buckets()
-
-    for bucket in response["Buckets"]:
-        print(bucket)
-
-    for obj in s3_client.Bucket("operational-space"):
-        print(obj)
+config = configparser.ConfigParser()
+config.read('config.ini')
+cluster_config = config['CLUSTER']
+s3_config = config['S3']
 
 
-def create_redshift_security_group(port, group_name):
+def create_redshift_security_group():
     ec2 = boto3.client('ec2')
 
+    # Each region has a unique VPC.
     response = ec2.describe_vpcs()
     vpc_id = response.get('Vpcs', [{}])[0].get('VpcId', '')
     if not vpc_id:
         raise RuntimeError("You must create a VPC first!")
 
+    port = int(cluster_config['DB_PORT'])
+    group_name = config['VPC']['SECURITY_GROUP_NAME']
     try:
         response = ec2.create_security_group(
             GroupName=group_name,
@@ -58,34 +55,33 @@ def create_redshift_security_group(port, group_name):
         raise e
 
 
-def create_redshift_cluster(identifier, *,
-                            iam_role_name,
-                            db_name,
-                            db_user,
-                            db_password,
-                            db_port,
-                            security_group_name):
+def get_iam_role_arns():
     iam_client = boto3.client('iam')
     # The IAM role was created by hand.
+    iam_role_name = config['IAM_ROLE']['ROLE_NAME']
     role_arns = [
         iam_client.get_role(RoleName=iam_role_name)['Role']['Arn']
     ]
+    return role_arns
 
-    security_group_id = create_redshift_security_group(
-        db_port, security_group_name)
+
+def create_redshift_cluster():
+    identifier = cluster_config['IDENTIFIER']
+    security_group_id = create_redshift_security_group()
+    iam_role_arns = get_iam_role_arns()
 
     redshift_client = boto3.client('redshift')
     try:
         response = redshift_client.create_cluster(
             ClusterType="multi-node",
-            NodeType="dc2.large",
-            NumberOfNodes=2,
-            DBName=db_name,
+            NodeType=cluster_config['NODE_TYPE'],
+            NumberOfNodes=int(cluster_config['NODE_COUNT']),
+            DBName=cluster_config['DB_NAME'],
             ClusterIdentifier=identifier,
-            MasterUsername=db_user,
-            MasterUserPassword=db_password,
-            Port=db_port,
-            IamRoles=role_arns,
+            MasterUsername=cluster_config['DB_USER'],
+            MasterUserPassword=cluster_config['DB_PASSWORD'],
+            Port=int(cluster_config['DB_PORT']),
+            IamRoles=iam_role_arns,
             VpcSecurityGroupIds=[security_group_id],
         )
     except ClientError as e:
@@ -108,14 +104,17 @@ def create_redshift_cluster(identifier, *,
     return response
 
 
-def get_redshift_cluster_endpoint(identifier):
+def get_redshift_cluster_endpoint():
     redshift_client = boto3.client('redshift')
-    endpoint = redshift_client.describe_clusters(ClusterIdentifier=identifier)[
+    endpoint = redshift_client.describe_clusters(
+        ClusterIdentifier=cluster_config['IDENTIFIER'])[
         'Clusters'][0]['Endpoint']
     return endpoint['Address'], endpoint['Port']
 
 
-def delete_redshift_cluster(identifier):
+def delete_redshift_cluster():
+    identifier = cluster_config['IDENTIFIER']
+
     redshift_client = boto3.client('redshift')
     print(f"Deleting Redshift cluster {identifier} ...")
     redshift_client.delete_cluster(ClusterIdentifier=identifier,
@@ -123,17 +122,11 @@ def delete_redshift_cluster(identifier):
 
 
 if __name__ == "__main__":
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    cluster_config = config['CLUSTER']
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--delete", action="store_true")
+    args = parser.parse_args()
 
-    create_redshift_cluster(
-        cluster_config['IDENTIFIER'],
-        iam_role_name=config['IAM_ROLE']['ROLE_NAME'],
-        db_name=cluster_config['DB_NAME'],
-        db_user=cluster_config['DB_USER'],
-        db_password=cluster_config['DB_PASSWORD'],
-        db_port=int(cluster_config['DB_PORT']),
-        security_group_name=config['VPC']['SECURITY_GROUP_NAME'])
-
-    # delete_redshift_cluster(cluster_config['IDENTIFIER'])
+    if args.delete:
+        delete_redshift_cluster()
+    else:
+        create_redshift_cluster()
