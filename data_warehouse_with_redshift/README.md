@@ -19,6 +19,9 @@ team from Sparkify and compare your results with their expected results.
 
 ## Datasets
 
+- s3://udacity-dend/song_data
+- s3://udacity-dend/log_data
+
 ### Song dataset
 
 The first dataset is a subset of real data from the 
