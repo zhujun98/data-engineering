@@ -103,12 +103,12 @@ aws emr create-default-roles
 
 ### Start an EMR cluster 
 ```sh
-aws emr create-cluster --release-label emr-5.28.0 \
+aws emr create-cluster --release-label emr-5.32.0 \
+                       --instance-type m5.xlarge \
                        --instance-count 3 \
                        --name data-lake-emr \
                        --use-default-roles \
-                       --applications Name=Spark Name=Livy \
-                       --instance-type m5.xlarge \
+                       --applications Name=Spark \
                        --ec2-attributes KeyName=<your permission key name>
 
 # optional
