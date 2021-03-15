@@ -95,40 +95,68 @@ traditional on-premises solutions and over 3x faster than standard Apache
 Spark. You can run workloads on Amazon EC2 instances, on Amazon Elastic 
 Kubernetes Service (EKS) clusters, or on-premises using EMR on AWS Outposts.
 
-- Create default roles in IAM.
+### Create default roles in IAM.
 ```sh
 aws emr create-default-roles
 ```
 ![](./default_emr_roles.png)
 
-- Start an EMR cluster 
+### Start an EMR cluster 
 ```sh
 aws emr create-cluster --release-label emr-5.28.0 \
                        --instance-count 3 \
                        --name data-lake-emr \
                        --use-default-roles \
-                       --applications Name=Spark \
+                       --applications Name=Spark Name=Livy \
                        --instance-type m5.xlarge \
                        --ec2-attributes KeyName=<your permission key name>
-                       
+
 # optional
 aws emr describe-cluster --cluster-id <ClusterId>
 ```
 
-- Modify the security group
+### Modify the security group
+
+This step is required for only once and can be skipped next time!.
+
+One can find the IP address at https://checkip.amazonaws.com/
 
 ```sh
 # Show EMR security group names and IDs.
 aws ec2 describe-security-groups --filters Name=group-name,Values="ElasticMapReduce-*" \
                                  --query "SecurityGroups[*].{Name:GroupName,ID:GroupId}"
+
+# Allow connect to the master node via ssh. 
+aws ec2 authorize-security-group-ingress --group-id <ElasticMapReduce-master ID> \
+                                         --protocol tcp \
+                                         --port 22 \
+                                         --cidr <IP address>/24
+
+# Show details of the modified security group.
+aws ec2 describe-security-groups --group-ids <ElasticMapReduce-master ID>
 ```
 
-- Run the ETL pipeline
+### Establish ssh connection to the master node
+
+```sh
+# Verify that you can ssh to the master node.
+chmod 400 <path/to/the/pem/file>
+ssh -i <path/to/the/pem/file> hadoop@<MasterPublicDnsName>
+
+# Open a SSH tunnel with port:
+# - 18080: Spark history server
+# -  8088: YARN ResourceManager
+ssh -i <path/to/the/pem/file> -N -L 8157:<MasterPublicDnsName>:<port> hadoop@<MasterPublicDnsName>
+```
+
+Open a local browser and go to http://localhost:8157
+
+### Run the ETL pipeline
 ```sh
 python etl.py
 ```
 
-- Terminate the EMR cluster
+### Terminate the EMR cluster
 ```sh
 aws emr list-clusters --active
 aws emr terminate-clusters --cluster-ids <ClusterId>
