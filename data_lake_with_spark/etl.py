@@ -3,8 +3,9 @@ from datetime import datetime
 import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, col
-from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format
-
+from pyspark.sql.functions import (
+    year, month, dayofmonth, hour, weekofyear, date_format
+)
 
 config = configparser.ConfigParser()
 config.read('dl.cfg')
@@ -21,32 +22,32 @@ def create_spark_session():
     return spark
 
 
-def process_song_data(spark, input_data, output_data):
-    # get filepath to song data file
-    song_data = 
-    
-    # read song data file
-    df = 
-
-    # extract columns to create songs table
-    songs_table = 
-    
-    # write songs table to parquet files partitioned by year and artist
-    songs_table
-
-    # extract columns to create artists table
-    artists_table = 
-    
-    # write artists table to parquet files
-    artists_table
+# def process_song_data(spark, input_data, output_data):
+#     # get filepath to song data file
+#     song_data =
+#
+#     # read song data file
+#     df =
+#
+#     # extract columns to create songs table
+#     songs_table =
+#
+#     # write songs table to parquet files partitioned by year and artist
+#     songs_table
+#
+#     # extract columns to create artists table
+#     artists_table =
+#
+#     # write artists table to parquet files
+#     artists_table
 
 
 def process_log_data(spark, input_data, output_data):
     # get filepath to log data file
-    log_data =
+    log_data = os.path.join(input_data, "log_data")
 
     # read log data file
-    df = 
+    df = spark.read.json(log_data)
     
     # filter by actions for song plays
     df = 
@@ -86,5 +87,5 @@ if __name__ == "__main__":
     input_data = "s3a://udacity-dend/"
     output_data = ""
 
-    process_song_data(spark, input_data, output_data)
+    # process_song_data(spark, input_data, output_data)
     process_log_data(spark, input_data, output_data)

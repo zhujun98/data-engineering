@@ -146,6 +146,7 @@ ssh -i <path/to/the/pem/file> hadoop@<MasterPublicDnsName>
 # Open a SSH tunnel with port:
 # - 18080: Spark history server
 # -  8088: YARN ResourceManager
+# - 50070: Hadoop file system
 ssh -i <path/to/the/pem/file> -N -L 8157:<MasterPublicDnsName>:<port> hadoop@<MasterPublicDnsName>
 ```
 
