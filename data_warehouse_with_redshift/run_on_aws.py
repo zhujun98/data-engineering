@@ -16,7 +16,7 @@ s3_config = config['S3']
 
 
 def create_redshift_security_group():
-    ec2 = boto3.client('ec2')
+    ec2 = boto3.client('ec2', region_name=s3_config['REGION'])
 
     # Each region has a unique VPC.
     response = ec2.describe_vpcs()
@@ -70,7 +70,7 @@ def create_redshift_cluster():
     security_group_id = create_redshift_security_group()
     iam_role_arns = get_iam_role_arns()
 
-    redshift_client = boto3.client('redshift')
+    redshift_client = boto3.client('redshift', region_name=s3_config['REGION'])
     try:
         response = redshift_client.create_cluster(
             ClusterType="multi-node",
@@ -105,7 +105,7 @@ def create_redshift_cluster():
 
 
 def get_redshift_cluster_endpoint():
-    redshift_client = boto3.client('redshift')
+    redshift_client = boto3.client('redshift', region_name=s3_config['REGION'])
     endpoint = redshift_client.describe_clusters(
         ClusterIdentifier=cluster_config['IDENTIFIER'])[
         'Clusters'][0]['Endpoint']
@@ -115,7 +115,7 @@ def get_redshift_cluster_endpoint():
 def delete_redshift_cluster():
     identifier = cluster_config['IDENTIFIER']
 
-    redshift_client = boto3.client('redshift')
+    redshift_client = boto3.client('redshift', region_name=s3_config['REGION'])
     print(f"Deleting Redshift cluster {identifier} ...")
     redshift_client.delete_cluster(ClusterIdentifier=identifier,
                                    SkipFinalClusterSnapshot=True)
