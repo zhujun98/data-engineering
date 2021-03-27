@@ -3,6 +3,8 @@
 Jun Zhu
 ___
 
+![](architecture.jpg)
+
 A music streaming startup, Sparkify, has grown their user base and song database 
 even more and want to move their data warehouse to a data lake. Their data 
 resides in S3, in a directory of JSON logs on user activity on the app, as well 
@@ -95,31 +97,43 @@ traditional on-premises solutions and over 3x faster than standard Apache
 Spark. You can run workloads on Amazon EC2 instances, on Amazon Elastic 
 Kubernetes Service (EKS) clusters, or on-premises using EMR on AWS Outposts.
 
-### Create default roles in IAM.
+#### Create a EC2 key pair
+
+```sh
+# Set the permission of the private key file.
+chmod 400 <path/to/the/pem/file>
+```
+
+#### Create default roles in IAM.
 ```sh
 aws emr create-default-roles
 ```
 ![](./default_emr_roles.png)
 
-### Start an EMR cluster 
+#### Start an EMR cluster 
 ```sh
-aws emr create-cluster --release-label emr-5.32.0 \
+# create a default subnet which is required to run the EMR notebook (optional)
+aws ec2 create-default-subnet --availability-zone <your zone name>
+
+# create the EMR cluster
+# Caveat: Kernel error occurs when using Jupyter notebook with emr-5.32.0!
+aws emr create-cluster --release-label emr-5.29.0 \
                        --instance-type m5.xlarge \
                        --instance-count 3 \
                        --name data-lake-emr \
                        --use-default-roles \
-                       --applications Name=Spark \
-                       --ec2-attributes KeyName=<your permission key name>
+                       --applications Name=Spark Name=Livy \
+                       --ec2-attributes SubnetId=<your subnet Id name>,KeyName=<your permission key name>
 
 # optional
 aws emr describe-cluster --cluster-id <ClusterId>
 ```
 
-### Modify the security group
+#### Modify the security group
 
 This step is required for only once and can be skipped next time!.
 
-One can find the IP address at https://checkip.amazonaws.com/
+Caveat: Your Ip address could vary from time to time!
 
 ```sh
 # Show EMR security group names and IDs.
@@ -136,11 +150,12 @@ aws ec2 authorize-security-group-ingress --group-id <ElasticMapReduce-master ID>
 aws ec2 describe-security-groups --group-ids <ElasticMapReduce-master ID>
 ```
 
-### Establish ssh connection to the master node
+One can find the IP address at https://checkip.amazonaws.com/
+
+#### Establish ssh connection to the master node
 
 ```sh
 # Verify that you can ssh to the master node.
-chmod 400 <path/to/the/pem/file>
 ssh -i <path/to/the/pem/file> hadoop@<MasterPublicDnsName>
 
 # Open a SSH tunnel with port:
@@ -152,12 +167,22 @@ ssh -i <path/to/the/pem/file> -N -L 8157:<MasterPublicDnsName>:<port> hadoop@<Ma
 
 Open a local browser and go to http://localhost:8157
 
-### Run the ETL pipeline
+#### Run EDA using EMR notebook (optional)
+
+
+
+#### Run the ETL pipeline
+
 ```sh
-python etl.py
+# Copy the file to the cluster.
+scp -i <path/to/the/pem/file> etl.py hadoop@<MasterPublicDnsName>:~/
+
+# Run the pipeline.
+ssh -i <path/to/the/pem/file> hadoop@<MasterPublicDnsName>
+spark-submit etl.py
 ```
 
-### Terminate the EMR cluster
+#### Terminate the EMR cluster
 ```sh
 aws emr list-clusters --active
 aws emr terminate-clusters --cluster-ids <ClusterId>
