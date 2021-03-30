@@ -61,7 +61,8 @@ A star schema is employed to facilitate queries on song play analysis.
   records with page NextSong.
   
   Columns: *songplay_id*, *start_time*, *user_id*, *level*, 
-  *song_id*, *artist_id*, *session_id*, *location*, *user_agent*
+  *song_id*, *artist_id*, *session_id*, *location*, *user_agent*,
+  *year*, *month*
 
 ### Dimension tables
 
@@ -133,7 +134,7 @@ aws emr describe-cluster --cluster-id <ClusterId>
 
 This step is required for only once and can be skipped next time!.
 
-Caveat: Your Ip address could vary from time to time!
+Caveat: Your IP address could vary from time to time!
 
 ```sh
 # Show EMR security group names and IDs.

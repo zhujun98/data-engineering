@@ -45,10 +45,10 @@ def process_song_data(spark, input_data_path, output_data_path):
          'duration']).drop_duplicates()
 
     # write songs table to parquet files partitioned by year
-    # Note: The code got stuck when the parquet files are partitioned by
+    # Note: The code got stuck at EMR when the parquet files are partitioned by
     #       both year and artist. The reason could be that there are too
     #       many entries with "year == 0".
-    songs_table.write.partitionBy("year").mode(
+    songs_table.write.partitionBy("year", "artist_id").mode(
         "overwrite").parquet(osp.join(output_data_path, "songs"))
 
     # extract columns to create artists table
@@ -140,7 +140,8 @@ def process_log_data(spark, input_data, output_data_path):
     # extract columns from joined song and log datasets to create songplays
     # table
     songplays_table = (
-        df.join(songs_df, songs_df.title == col("song"))
+        df.join(songs_df.withColumnRenamed("year", "year_songs_table"),
+                songs_df.title == col("song"))
             .selectExpr([
                 "start_time",
                 "userId as user_id",
@@ -149,13 +150,15 @@ def process_log_data(spark, input_data, output_data_path):
                 "artist_id",
                 "sessionId as session_id",
                 "location",
-                "userAgent as user_agent"])
+                "userAgent as user_agent",
+                "month",
+                "year"])
             .withColumn("songplay_id", F.monotonically_increasing_id())
     )
 
     # write songplays table to parquet files
-    songplays_table.write.mode("overwrite").parquet(
-        osp.join(output_data_path, "songplays"))
+    songplays_table.write.partitionBy("year", "month").mode(
+        "overwrite").parquet(osp.join(output_data_path, "songplays"))
 
 
 if __name__ == "__main__":
