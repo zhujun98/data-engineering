@@ -169,7 +169,7 @@ Open a local browser and go to http://localhost:8157
 
 #### Run EDA using EMR notebook (optional)
 
-
+Example [Jupyter notebook](./spartify.ipynb)
 
 #### Run the ETL pipeline
 
