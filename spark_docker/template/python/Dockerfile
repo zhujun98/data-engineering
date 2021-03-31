@@ -1,15 +1,9 @@
-FROM bde2020/spark-submit:3.1.1-hadoop3.2
+FROM zhujun/spark-local-submit
 
-LABEL maintainer="Gezim Sejdiu <g.sejdiu@gmail.com>, Giannis Mouchakis <gmouchakis@gmail.com>"
+RUN python3 -m pip install --upgrade pip && \
+    pip3 install pyspark==${SPARK_VERSION}
 
-COPY template.sh /
-
-# Copy the requirements.txt first, for separate dependency resolving and downloading
-ONBUILD COPY requirements.txt /app/
-ONBUILD RUN cd /app \
-      && pip3 install -r requirements.txt
-
-# Copy the source code
 ONBUILD COPY . /app
+ONBUILD RUN if [[ -f /app/requirements.txt ]]; then pip3 install -r /app/requirements.txt; fi
 
-CMD ["/bin/bash", "/template.sh"]
+CMD ["/bin/bash"]

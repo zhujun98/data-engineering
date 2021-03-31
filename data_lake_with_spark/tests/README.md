@@ -1,27 +1,37 @@
-### Test Spark EMR cluster
+## Test Spark on an EMR cluster
 
-- Copy data to S3.
+### Test 1
 
-```sh
-aws s3 cp ./cities.csv s3://<bucket_name>
-```
-
-- Copy all the Python scripts to the cluster.
-
-- Run the tests
 ```sh
 spark-submit spark_script1.py
+```
+
+### Test 2
+
+```sh
+aws s3 cp ./cities.csv s3://<bucket_name>/
 spark-submit spark_script2.py
 ```
 
-- Copy the `csv` file from S3 to Hadoop file system.
+### Test 3
 
-One can connect to the `HDFS Name Node` web interface to browse the 
-HDFS file structure.
+- Copy the `csv` file from S3 to Hadoop file system.
 
 ```sh
 # Make a directory first.
 hdfs dfs -mkdir /user/sparkify-data
 # Copy the data.
 hadoop fs -cp s3://<bucket_name>/cities.csv /user/sparkify_data
+```
+
+One can connect to the `HDFS Name Node` web interface to browse the 
+HDFS file structure.
+
+## Test Spark on a local cluster
+
+```sh
+sudo docker build -t spark-cluster-test .
+
+docker run --rm --link spark-master:spark-master --net dockerspark_default \
+           -it spark-cluster-test
 ```
