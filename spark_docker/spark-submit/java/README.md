@@ -13,7 +13,7 @@ The Maven `package` command must create an assembly JAR (or 'uber' JAR) containi
 1. Create a Dockerfile in the root folder of your project (which also contains a `pom.xml`)
 2. Extend the Spark Java template Docker image
 3. Configure the following environment variables (unless the default value satisfies):
-  * `SPARK_MASTER_NAME` (default: spark-master)
+  * `SPARK_MASTER_HOST` (default: spark-master)
   * `SPARK_MASTER_PORT` (default: 7077)
   * `SPARK_APPLICATION_JAR_NAME` (default: application-1.0)
   * `SPARK_APPLICATION_MAIN_CLASS` (default: my.main.Application)

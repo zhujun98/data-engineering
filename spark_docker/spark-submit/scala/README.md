@@ -38,7 +38,7 @@ dependencies.
 2. Extend the Spark Scala template Docker image
 3. Configure the following environment variables (unless the default value
    satisfies):
-  * `SPARK_MASTER_NAME` (default: spark-master)
+  * `SPARK_MASTER_HOST` (default: spark-master)
   * `SPARK_MASTER_PORT` (default: 7077)
   * `SPARK_APPLICATION_MAIN_CLASS` (default: Application)
   * `SPARK_APPLICATION_ARGS` (default: "")
