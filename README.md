@@ -4,8 +4,10 @@ Jun Zhu
 
 ## Dev Environment Setup
 
-- [Instruction](./spark_docker) of setting up a standalone Spark cluster 
-  locally using Docker.
+- [Instruction](./dev_envs/spark_docker) of setting up a standalone Spark cluster 
+  locally in Docker.
+  
+- [Instruction](./dev_envs/airflow_docker) of running Airflow in Docker.
 
 ## Udacity Data Engineering Nanodegree
 
