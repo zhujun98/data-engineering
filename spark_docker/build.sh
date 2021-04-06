@@ -33,6 +33,7 @@ docker build \
   -t ${COMMON_PREFIX}-spark-worker .
 
 docker build \
+  --build-arg SHARED_WORKSPACE=${SHARED_WORKSPACE} \
   -f spark-submit/Dockerfile \
   -t ${COMMON_PREFIX}-spark-submit .
 

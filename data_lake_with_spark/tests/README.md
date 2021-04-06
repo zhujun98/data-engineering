@@ -27,11 +27,11 @@ hadoop fs -cp s3://<bucket_name>/cities.csv /user/sparkify_data
 One can connect to the `HDFS Name Node` web interface to browse the 
 HDFS file structure.
 
-## Test Spark on a local cluster
+## Test Spark on a standalone Spark cluster locally
 
 ```sh
 sudo docker build -t spark-cluster-test .
 
-docker run --rm --link spark-master:spark-master --net dockerspark_default \
-           -it spark-cluster-test
+docker run --rm -it spark-cluster-test /bin/bash
+python /app/spark_script1.py
 ```

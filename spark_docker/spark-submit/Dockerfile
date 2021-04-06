@@ -1,10 +1,13 @@
 FROM spark-local-spark-base
 
+ARG SHARED_WORKSPACE
+
 ENV SPARK_APPLICATION_JAR_LOCATION=/app/application.jar
 ENV SPARK_APPLICATION_PYTHON_LOCATION=/app/app.py
 ENV SPARK_APPLICATION_MAIN_CLASS=my.main.Application
 ENV SPARK_APPLICATION_ARGS=""
 
-COPY spark-submit/submit.sh /
+WORKDIR ${SHARED_WORKSPACE}
 
-CMD ["/bin/bash", "/submit.sh"]
+# copy to WORKDIR
+COPY spark-submit/submit.sh .

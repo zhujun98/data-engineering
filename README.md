@@ -2,6 +2,11 @@
 
 Jun Zhu
 
+## Dev Environment Setup
+
+- [Instruction](./spark_docker) of setting up a standalone Spark cluster 
+  locally using Docker.
+
 ## Udacity Data Engineering Nanodegree
 
 - [Data Modeling with postgreSQL](./data_modeling_with_postgres)

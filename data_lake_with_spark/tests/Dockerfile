@@ -1,8 +1,5 @@
-FROM zhujun/spark-local-python-template
+FROM spark-local-spark-submit-python
 
-# ENV SPARK_MASTER_NAME spark-master
-# ENV SPARK_MASTER_PORT 7077
-ENV SPARK_APPLICATION_PYTHON_LOCATION /app/spark_script1.py
-# ENV SPARK_APPLICATION_ARGS
+ENV SPARK_APPLICATION_PYTHON_LOCATION=/app/spark_script1.py
 
 CMD ["/bin/bash"]
