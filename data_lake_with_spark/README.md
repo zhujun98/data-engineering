@@ -1,4 +1,4 @@
-# Data Lake
+# DEND - Data Lake with Apache Spark
 
 Jun Zhu
 ___

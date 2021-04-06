@@ -1,4 +1,4 @@
-# Data Warehouse
+# DEND - Data Warehouse with Amazon Redshift
 
 Jun Zhu
 ___

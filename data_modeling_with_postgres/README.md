@@ -1,4 +1,4 @@
-# Data Modeling with PostgreSQL
+# DEND - Data Modeling with PostgreSQL
 
 Jun Zhu
 ___

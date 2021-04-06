@@ -1,4 +1,4 @@
-# Data Modeling with Apache Cassandra
+# DEND - Data Modeling with Apache Cassandra
 
 Jun Zhu
 ___
