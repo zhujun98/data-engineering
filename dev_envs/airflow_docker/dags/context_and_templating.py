@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 
 def log_details(*args, **kwargs):
     # NOTE: Look here for context variables passed in on kwargs:
-    #       https://airflow.apache.org/macros.html
+    #       https://airflow.apache.org/docs/apache-airflow/stable/macros-ref.html
     #
     logging.info(f"Execution date is {kwargs['ds']}")
     logging.info(f"My run id is {kwargs['run_id']}")
