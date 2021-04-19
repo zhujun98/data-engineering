@@ -3,46 +3,13 @@ import datetime
 import logging
 
 from airflow import DAG
-from airflow.contrib.hooks.aws_hook import AwsHook
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.python_operator import PythonOperator
 
+from s3_to_redshift import S3ToRedshiftOperator
+
 import sql_statements
-
-
-PARTITION_BY_MONTH = True
-
-
-def load_trip_data_to_redshift(*args, **kwargs):
-    aws_hook = AwsHook("aws_credentials", client_type="s3")
-    credentials = aws_hook.get_credentials()
-    redshift_hook = PostgresHook("redshift")
-    if PARTITION_BY_MONTH:
-        execution_date = kwargs.get('execution_date')
-        sql_stmt = sql_statements.COPY_MONTHLY_TRIPS_SQL.format(
-            credentials.access_key,
-            credentials.secret_key,
-            year=execution_date.year,
-            month=execution_date.month
-        )
-    else:
-        sql_stmt = sql_statements.COPY_ALL_TRIPS_SQL.format(
-            credentials.access_key,
-            credentials.secret_key
-        )
-    redshift_hook.run(sql_stmt)
-
-
-def load_station_data_to_redshift(*args, **kwargs):
-    aws_hook = AwsHook("aws_credentials", client_type="s3")
-    credentials = aws_hook.get_credentials()
-    redshift_hook = PostgresHook("redshift")
-    sql_stmt = sql_statements.COPY_STATIONS_SQL.format(
-        credentials.access_key,
-        credentials.secret_key
-    )
-    redshift_hook.run(sql_stmt)
 
 
 def check_greater_than_zero(*args, **kwargs):
@@ -75,11 +42,13 @@ create_trips_table = PostgresOperator(
 )
 
 # https://airflow.apache.org/docs/apache-airflow/stable/_modules/airflow/models/baseoperator.html
-copy_trips_task = PythonOperator(
+copy_trips_task = S3ToRedshiftOperator(
+    aws_credentials_id="aws_credentials",
+    redshift_conn_id="redshift",
+    table="trips",
+    s3_path="s3://udacity-dend/data-pipelines/divvy/partitioned/{execution_date.year}/{execution_date.month}/divvy_trips.csv",
     task_id='load_trips_from_s3_to_redshift',
     dag=dag,
-    python_callable=load_trip_data_to_redshift,
-    provide_context=True,
     sla=datetime.timedelta(hours=1)
 )
 
@@ -100,10 +69,13 @@ create_stations_table = PostgresOperator(
     sql=sql_statements.CREATE_STATIONS_TABLE_SQL,
 )
 
-copy_stations_task = PythonOperator(
+copy_stations_task = S3ToRedshiftOperator(
+    aws_credentials_id="aws_credentials",
+    redshift_conn_id="redshift",
+    table="stations",
+    s3_path="s3://udacity-dend/data-pipelines/divvy/unpartitioned/divvy_stations_2017.csv",
     task_id='load_stations_from_s3_to_redshift',
-    dag=dag,
-    python_callable=load_station_data_to_redshift,
+    dag=dag
 )
 
 check_stations = PythonOperator(

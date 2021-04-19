@@ -38,19 +38,9 @@ COPY_SQL = """
     DELIMITER ','
 """
 
-COPY_MONTHLY_TRIPS_SQL = COPY_SQL.format(
-    "trips",
-    "s3://udacity-dend/data-pipelines/divvy/partitioned/{year}/{month}/divvy_trips.csv"
-)
-
 COPY_ALL_TRIPS_SQL = COPY_SQL.format(
     "trips",
     "s3://udacity-dend/data-pipelines/divvy/unpartitioned/divvy_trips_2018.csv"
-)
-
-COPY_STATIONS_SQL = COPY_SQL.format(
-    "stations",
-    "s3://udacity-dend/data-pipelines/divvy/unpartitioned/divvy_stations_2017.csv"
 )
 
 LOCATION_TRAFFIC_SQL = """
