@@ -1,0 +1,4 @@
+logs/*
+!logs/.gitkeep
+
+docker-compose.yaml
