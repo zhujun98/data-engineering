@@ -29,6 +29,8 @@ CREATE_STATIONS_TABLE_SQL = """
     DISTSTYLE ALL;
 """
 
+# There are two '{{}}' since the string will be format twice. For the first
+# time, the inner '{}' will be eliminated if nothing is provided.
 COPY_SQL = """
     COPY {}
     FROM '{}'

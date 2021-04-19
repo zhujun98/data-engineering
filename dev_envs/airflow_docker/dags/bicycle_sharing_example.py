@@ -1,29 +1,14 @@
 # Scheduling, partitioning and data quality check
 import datetime
-import logging
 
 from airflow import DAG
-from airflow.hooks.postgres_hook import PostgresHook
 from airflow.operators.postgres_operator import PostgresOperator
-from airflow.operators.python_operator import PythonOperator
 
 from s3_to_redshift import S3ToRedshiftOperator
+from facts_calculator import FactsCalculatorOperator
+from has_rows import HasRowsOperator
 
 import sql_statements
-
-
-def check_greater_than_zero(*args, **kwargs):
-    table = kwargs["params"]["table"]
-    redshift_hook = PostgresHook("redshift")
-    records = redshift_hook.get_records(f"SELECT COUNT(*) FROM {table}")
-    if len(records) < 1 or len(records[0]) < 1:
-        raise ValueError(f"Data quality check failed. {table} returned no results")
-    num_records = records[0][0]
-    if num_records < 1:
-        raise ValueError(f"Data quality check failed. {table} contained 0 rows")
-
-    logging.info(f"Data quality on table {table} check passed with "
-                 f"{records[0][0]} records")
 
 
 dag = DAG(
@@ -52,14 +37,21 @@ copy_trips_task = S3ToRedshiftOperator(
     sla=datetime.timedelta(hours=1)
 )
 
-check_trips = PythonOperator(
+check_trips = HasRowsOperator(
     task_id='check_trips_data',
     dag=dag,
-    python_callable=check_greater_than_zero,
-    provide_context=True,
-    params={
-        'table': 'trips',
-    }
+    redshift_conn_id="redshift",
+    table='trips'
+)
+
+calculate_facts = FactsCalculatorOperator(
+    task_id="calculate_facts_trips",
+    dag=dag,
+    redshift_conn_id="redshift",
+    origin_table="trips",
+    destination_table="trips_facts",
+    fact_column="tripduration",
+    groupby_column="bikeid"
 )
 
 create_stations_table = PostgresOperator(
@@ -78,18 +70,17 @@ copy_stations_task = S3ToRedshiftOperator(
     dag=dag
 )
 
-check_stations = PythonOperator(
+check_stations = HasRowsOperator(
     task_id='check_stations_data',
     dag=dag,
-    python_callable=check_greater_than_zero,
-    provide_context=True,
-    params={
-        'table': 'stations',
-    }
+    redshift_conn_id="redshift",
+    table='stations'
 )
+
 
 create_trips_table >> copy_trips_task
 copy_trips_task >> check_trips
+check_trips >> calculate_facts
 
 create_stations_table >> copy_stations_task
 copy_stations_task >> check_stations
