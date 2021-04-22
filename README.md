@@ -22,6 +22,9 @@ Jun Zhu
   ![](./data_lake_with_spark/architecture.jpg)
 
 - [Data Pipeline with Apache Airflow](./data_pipeline_with_airflow)
+  
+  ![](./data_pipeline_with_airflow/pipeline.png)
+
 - [Data Engineering Capstone Project](./data_engineering_capstone_project)
 
 ## Udacity Data Streaming Nanodegree
