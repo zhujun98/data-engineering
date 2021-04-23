@@ -1,0 +1,7 @@
+workspace/datasets/*/*.csv
+workspace/datasets/*/*.json
+
+!airflow/.env
+airflow/logs/*
+!airflow/logs/.gitkeep
+airflow/docker-compose.yaml
