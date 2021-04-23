@@ -1,7 +1,15 @@
 version: '3'
+
 volumes:
+  # It sits by default in /var/lib/docker/volumes/
   shared-workspace:
     driver: local
+    driver_opts:
+      type: none
+      # We need this since $PWD does not work when running Docker with sudo
+      device: ${LOCAL_WORKSPACE}
+      o: bind
+
 services:
   spark-master:
     image: spark-local-spark-master
