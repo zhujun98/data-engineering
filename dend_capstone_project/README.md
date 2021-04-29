@@ -11,12 +11,12 @@ Clearly state the rationale for the choice of tools and technologies for the pro
 
 ![](./architecture.jpg)
 
-## Dataset
+## Datasets
 
 ### Captial Bikeshare trip data
 
 [Capital Bikeshare](https://www.capitalbikeshare.com/) is a metro DC's 
-bikeshare service in the US, with thousands of bikes and hundreds stations 
+bikeshare service in the US, with thousands of bikes and hundreds of stations 
 across 7 jurisdictions: Washington, DC.; Arlington, VA; Alexandria, VA; 
 Montgomery, MD; Prince George's County, MD; Fairfax County, VA; and the City 
 of Falls Church, VA. Designed for quick trips with convenience in mind, 
@@ -31,8 +31,8 @@ format that allow to answer those questions.
 #### Weather data
 
 The weather data is from [NOAA](https://www.ncdc.noaa.gov/cdo-web/). I ordered
-daily observation data since 1.1.2018 from 26 stations around the operation 
-area of Capital Bikeshare. The data is in **CSV** format. 
+daily observation data since 1.1.2018 from more than 100 weather stations in 
+Washington DC. The data is in **CSV** format. 
 
 #### Covid data
 
