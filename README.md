@@ -9,6 +9,8 @@ Jun Zhu
   
 - [Instruction](./dev_envs/airflow_docker) of running Airflow in Docker.
 
+- [Instruction](./dev_envs/kafka_docker) of running Kafka in Docker.
+
 ## Udacity Data Engineering Nanodegree
 
 - [Data Modeling with postgreSQL](./data_modeling_with_postgres)
