@@ -45,9 +45,12 @@ pip install -r requirements.txt
 Run synchronous producer and consumer:
 ```sh
 # Terminal 1
-python producer_consumer.py --sync
+python python/producer_consumer.py --sync
 ```
 ```sh
 # Terminal 2
-python producer_consumer.py --sync --consumer
+python python/producer_consumer.py --sync --consumer
 ```
+
+## Java API
+
