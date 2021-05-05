@@ -28,12 +28,6 @@ most rides taken on? Capital Bikeshare provides all the
 [trip data](https://s3.amazonaws.com/capitalbikeshare-data/index.html) in **CSV**
 format that allow to answer those questions.
 
-#### Weather data
-
-The weather data is from [NOAA](https://www.ncdc.noaa.gov/cdo-web/). I ordered
-daily observation data since 1.1.2018 from more than 100 weather stations in 
-Washington DC. The data is in **CSV** format. 
-
 #### Covid data
 
 The [COVID Tracking project](https://covidtracking.com/) collects, 
@@ -45,6 +39,12 @@ and long-term-care facilities via the Long-Term-Care tracker.
 The capstone project uses `Historic values for all states` **JSON** data 
 downloaded from the [data API](https://covidtracking.com/data/api). 
 Descriptions of the data fields can also be found there.
+
+#### Weather data
+
+The weather data is from [NOAA](https://www.ncdc.noaa.gov/cdo-web/). I ordered
+daily observation data since 1.1.2018 from more than 100 weather stations in 
+Washington DC. The data is in **CSV** format. 
 
 ## Explore and Assess the Data
 
