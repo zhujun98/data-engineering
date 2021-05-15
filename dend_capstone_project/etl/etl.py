@@ -1,10 +1,11 @@
+import os.path as osp
 import pathlib
 from datetime import datetime
 
-import pyspark
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
-    BooleanType, DateType, DoubleType, IntegerType, LongType, StringType, StructField, StructType, TimestampType
+    BooleanType, DateType, DoubleType, IntegerType, LongType, StringType,
+    StructField, StructType, TimestampType
 )
 from pyspark.sql import functions as F
 
@@ -93,15 +94,16 @@ def process_trip_data(input_data_path, output_data_path):
         "tid", F.monotonically_increasing_id()).withColumn(
         "start_date", F.to_date(F.col("started_at")))
 
+    # station_data.show(5)
+    # trip_data.show(5)
+
     # write station_data and trip_data to parquet files
-    station_data.write.mode(
-        "overwrite").parquet(
-        pathlib.Path(output_data_path).joinpath("station_data"))
+    station_data.write.mode("overwrite").parquet(
+        osp.join(output_data_path, "station_data"))
 
     # write trip_data to parquet files
-    trip_data.write.partitionBy("start_station_id", "end_station_id").mode(
-        "overwrite").parquet(
-        pathlib.Path(output_data_path).joinpath("trip_data"))
+    trip_data.write.partitionBy("start_station_id").mode(
+        "overwrite").parquet(osp.join(output_data_path, "trip_data"))
 
 
 def process_covid_data(input_data_path, output_data_path):
@@ -128,10 +130,11 @@ def process_covid_data(input_data_path, output_data_path):
 
     covid_data = covid_data.dropDuplicates(["date"])
 
+    # covid_data.show(5)
+
     # write covid_data to parquet files
-    covid_data.write.mode(
-        "overwrite").parquet(
-        pathlib.Path(output_data_path).joinpath("covid_data"))
+    covid_data.write.mode("overwrite").parquet(
+        osp.join(output_data_path, "covid_data"))
 
 
 def process_weather_data(input_data_path, output_data_path):
@@ -186,15 +189,20 @@ def process_weather_data(input_data_path, output_data_path):
     weather_data = weather_data.filter(F.col("STATION") == "USW00093721").drop(
         "STATION")
 
+    # weather_data.show(5)
+
     # write weather_data to parquet files
-    weather_data.write.mode(
-        "overwrite").parquet(
-        pathlib.Path(output_data_path).joinpath("weather_data"))
+    weather_data.write.mode("overwrite").parquet(
+        osp.join(output_data_path, "weather_data"))
 
 
 if __name__ == "__main__":
-    output_folder = "./workspace/"
+    root_folder = "/opt/workspace"
+    output_folder = osp.join(root_folder, "processed")
 
-    process_trip_data("./datasets/capitalbikeshare_tripdata", output_folder)
-    process_covid_data("./datasets/covid_data/daily.json", output_folder)
-    process_weather_data("./datasets/weather_data/*_daily.csv", output_folder)
+    process_trip_data(f"{root_folder}/datasets/capitalbikeshare_tripdata",
+                      output_folder)
+    process_covid_data(f"{root_folder}/datasets/covid_data/daily.json",
+                       output_folder)
+    process_weather_data(f"{root_folder}/datasets/weather_data/*_daily.csv",
+                         output_folder)

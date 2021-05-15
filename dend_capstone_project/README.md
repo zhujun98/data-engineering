@@ -63,6 +63,17 @@ in the current directory.
 
 ## Run ETL Pipeline to Model the Data
 
+#### Test on a standalone Spark cluster locally
+
+```sh
+sudo docker build -t capstone-project-spark-cluster .
+
+sudo docker run --network spark_docker_default -v ${PWD}/etl:/app/ 
+                -v ${PWD}/workspace:/opt/workspace --rm 
+                -it capstone-project-spark-cluster /bin/bash
+spark-submit --master spark://spark-master:7077 etl.py
+```
+
 #### Start an EMR cluster
 
 #### Run Apache Airflow in Docker

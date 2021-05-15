@@ -1,5 +1,6 @@
 workspace/datasets/*/*.csv
 workspace/datasets/*/*.json
+workspace/processed
 
 !airflow/.env
 airflow/logs/*
