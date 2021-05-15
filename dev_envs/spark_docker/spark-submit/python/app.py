@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
 
-    spark = SparkSession.builder.appName("test1").getOrCreate()
+    spark = SparkSession.builder.appName("spark_test").getOrCreate()
 
     log_of_songs = [
         "Despacito",

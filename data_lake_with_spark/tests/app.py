@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
 
-    spark = SparkSession.builder.appName("test2").getOrCreate()
+    spark = SparkSession.builder.appName("spark_test").getOrCreate()
 
     df = spark.read.csv("s3://spark-data-lake-123/cities.csv", header=True)
     df.printSchema()

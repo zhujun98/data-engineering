@@ -23,6 +23,6 @@ docker-compose down
 
 ## Launch a Spark application
 
-* [Java template](spark-submit/java)
-* [Python template](spark-submit/python)
-* [Scala template](spark-submit/scala)
+* [Python example](spark-submit/python)
+* [Java example](spark-submit/java)
+* [Scala example](spark-submit/scala)

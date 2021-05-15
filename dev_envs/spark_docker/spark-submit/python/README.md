@@ -1,7 +1,8 @@
-# Spark Python template
+## Test Spark on a standalone Spark cluster locally
 
-The Spark Python template image serves as a base image to build your own 
-Python application to run on a Spark cluster.
+```sh
+sudo docker build -t spark-cluster-test .
 
-An example on how to build a concrete app on top of the template can be 
-found at [here](../../../data_lake_with_spark/tests).
+docker run --network spark_docker_default --rm -it spark-cluster-test /bin/bash
+spark-submit --master spark://spark-master:7077 app.py
+```

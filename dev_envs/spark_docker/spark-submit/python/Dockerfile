@@ -1,11 +1,7 @@
-FROM spark-local-spark-submit
+FROM spark-local-pyspark-base
 
-ARG PYSPARK_VERSION
+COPY . /app/
 
-RUN apt-get install -y python3-pip && \
-    pip3 install pyspark==${PYSPARK_VERSION}
+WORKDIR /app
 
-ONBUILD COPY . /app
-ONBUILD RUN /bin/bash -c "if [[ -f '/app/requirements.txt' ]]; then pip3 install -r /app/requirements.txt; fi"
-
-CMD ["/bin/bash", "./submit.sh"]
+CMD ["/bin/bash"]

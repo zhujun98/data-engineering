@@ -1,4 +1,15 @@
-FROM zhujun/spark-local-submit
+FROM spark-local-spark-base
+
+ARG SHARED_WORKSPACE
+
+ENV SPARK_APPLICATION_JAR_LOCATION=/app/application.jar
+ENV SPARK_APPLICATION_MAIN_CLASS=my.main.Application
+ENV SPARK_APPLICATION_ARGS=""
+
+WORKDIR ${SHARED_WORKSPACE}
+
+# copy to WORKDIR
+COPY spark-submit/submit.sh .
 
 ARG SBT_VERSION
 ENV SBT_VERSION=${SBT_VERSION:-1.4.1}
