@@ -1,4 +1,5 @@
 workspace/datasets/*/*.csv
+workspace/datasets/*/*/*.csv
 workspace/datasets/*/*.json
 workspace/processed
 

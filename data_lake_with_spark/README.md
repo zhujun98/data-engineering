@@ -178,6 +178,9 @@ Example [Jupyter notebook](./spartify.ipynb)
 # Copy the file to the cluster.
 scp -i <path/to/the/pem/file> etl.py hadoop@<MasterPublicDnsName>:~/
 
+# Set Pyspark Python version
+sudo sed -i -e '$a\export PYSPARK_PYTHON=/usr/bin/python3' /etc/spark/conf/spark-env.sh
+
 # Run the pipeline.
 ssh -i <path/to/the/pem/file> hadoop@<MasterPublicDnsName>
 spark-submit etl.py

@@ -63,18 +63,34 @@ in the current directory.
 
 ## Run ETL Pipeline to Model the Data
 
-#### Test on a standalone Spark cluster locally
+#### Test on a standalone Spark cluster locally (optional)
 
 ```sh
 sudo docker build -t capstone-project-spark-cluster .
 
-sudo docker run --network spark_docker_default -v ${PWD}/etl:/app/ 
-                -v ${PWD}/workspace:/opt/workspace --rm 
+sudo docker run --network spark_docker_default -v ${PWD}/etl:/app/ \
+                -v ${PWD}/workspace:/opt/workspace --rm \
                 -it capstone-project-spark-cluster /bin/bash
-spark-submit --master spark://spark-master:7077 etl.py
+spark-submit --master spark://spark-master:7077 etl.py --local
+```
+
+#### Copy datasets to S3
+
+```sh
+aws s3 cp --recursive ./datasets s3://dend-capstone-project-workspace/datasets/
 ```
 
 #### Start an EMR cluster
+
+Check [here](../data_lake_with_spark).
+
+```sh
+# Copy the file to the cluster.
+scp -i <path/to/the/pem/file> -r etl hadoop@<MasterPublicDnsName>:~/
+
+# Run job
+spark-submit etl/etl.py
+```
 
 #### Run Apache Airflow in Docker
 

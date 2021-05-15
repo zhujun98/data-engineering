@@ -1,5 +1,5 @@
 import os.path as osp
-import pathlib
+import argparse
 from datetime import datetime
 
 from pyspark.sql import SparkSession
@@ -13,14 +13,8 @@ spark = SparkSession.builder.appName("Sparkify ETL").getOrCreate()
 
 
 def process_trip_data(input_data_path, output_data_path):
-    data_folder = pathlib.Path(input_data_path)
-    paths_old = []
-    paths_new = []
-    for filename in data_folder.glob("*.csv"):
-        if int(filename.stem[:6]) <= 202003:
-            paths_old.append(str(filename))
-        else:
-            paths_new.append(str(filename))
+    paths_old = osp.join(input_data_path, "old")
+    paths_new = osp.join(input_data_path, "new")
 
     trip_data_new_schema = StructType([
         StructField('ride_id', StringType()),
@@ -197,7 +191,16 @@ def process_weather_data(input_data_path, output_data_path):
 
 
 if __name__ == "__main__":
-    root_folder = "/opt/workspace"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--local", action="store_true")
+
+    args = parser.parse_args()
+
+    if args.local:
+        root_folder = "/opt/workspace"
+    else:
+        root_folder = "s3://dend-capstone-project-workspace"
+
     output_folder = osp.join(root_folder, "processed")
 
     process_trip_data(f"{root_folder}/datasets/capitalbikeshare_tripdata",
