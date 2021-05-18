@@ -53,7 +53,7 @@ Details can be found in the Jupyter notebook
 
 #### Setting up a Spark cluster locally (optional)
 
-Check the Docker Compose file [here](../dev_envs/spark_docker). Remeber to change
+Check the Docker Compose file [here](../dev_envs/spark_docker). Remember to change
 the `WORKSPACE` in the [env](../dev_envs/spark_docker/.env) file to the `workspace`
 in the current directory.
 
@@ -90,6 +90,12 @@ scp -i <path/to/the/pem/file> -r etl hadoop@<MasterPublicDnsName>:~/
 
 # Run job
 spark-submit etl/etl.py
+```
+
+### Start an AWS Redshift cluster and create tables
+
+```sh
+python redshift/start_db_on_redshift.py
 ```
 
 #### Run Apache Airflow in Docker
