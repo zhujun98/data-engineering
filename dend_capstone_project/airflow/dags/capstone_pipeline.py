@@ -4,6 +4,7 @@ from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 
 from load_to_redshift import LoadToRedshiftOperator
+from data_quality import DataCountCheckOperator, TripDateCheckOperator
 
 
 default_args = {
@@ -19,33 +20,6 @@ default_args = {
 dag = DAG('capstone_pipeline',
           default_args=default_args,
           max_active_runs=1)
-
-# trip_data_etl = StageToRedshiftOperator(
-#     task_id='stage_events',
-#     dag=dag,
-#     aws_credentials_id="aws_credentials",
-#     redshift_conn_id="redshift",
-#     table="staging_events",
-#     s3_path="s3://udacity-dend/log_data",
-#     json_path="s3://udacity-dend/log_json_path.json")
-#
-# covid_data_etl = StageToRedshiftOperator(
-#     task_id='stage_songs',
-#     dag=dag,
-#     aws_credentials_id="aws_credentials",
-#     redshift_conn_id="redshift",
-#     table="staging_songs",
-#     s3_path="s3://udacity-dend/song_data"
-# )
-#
-# weather_data_etl = StageToRedshiftOperator(
-#     task_id='stage_songs',
-#     dag=dag,
-#     aws_credentials_id="aws_credentials",
-#     redshift_conn_id="redshift",
-#     table="staging_songs",
-#     s3_path="s3://udacity-dend/song_data"
-# )
 
 S3_BUCKET = "s3://dend-capstone-project-workspace/processed/"
 
@@ -77,16 +51,24 @@ load_weather_table = LoadToRedshiftOperator(
     s3_path=S3_BUCKET + "weather_data"
 )
 
-# run_quality_checks = DataQualityOperator(
-#     task_id='run_data_quality_checks',
-#     dag=dag,
-#     redshift_conn_id="redshift",
-#     tables=['songs', 'time', 'users', 'artists', 'songplays']
-# )
+data_count_checks = DataCountCheckOperator(
+    task_id='check_data_count',
+    dag=dag,
+    redshift_conn_id="redshift",
+    tables=['trip', 'station', 'covid', 'weather']
+)
 
-end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
+date_checks = TripDateCheckOperator(
+    task_id='check_trip_date',
+    dag=dag,
+    redshift_conn_id="redshift"
+)
 
-[load_trip_table,
- load_station_table,
- load_covid_table,
- load_weather_table] >> end_operator
+finish_load_operator = DummyOperator(task_id='finish_loading',  dag=dag)
+
+end_operator = DummyOperator(task_id='stop_execution',  dag=dag)
+
+[load_trip_table, load_station_table, load_covid_table, load_weather_table] \
+    >> finish_load_operator \
+    >> [data_count_checks, date_checks] \
+    >> end_operator

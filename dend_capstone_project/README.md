@@ -117,14 +117,24 @@ cd airflow
 docker-compose up
 ```
 
-#### Trigger the data pipeline
+![](airflow/pipeline.jpg)
 
-Debug errors when copying from S3 to Redshift:
+There are two types of data checks:
+
+- Check the data count in each table
+- Check the date range in the trip table
+
+Caveat: debug errors when copying from S3 to Redshift:
 ```sql
 select message from SVL_S3LOG where query = <query id>
 ```
 
-*Propose how often the data should be updated and why.*
+Note: Due to the cost reason, I did not add the Spark part into the Airflow.
+Otherwise, I have to run both EMR cluster nd Redshift cluster at the same time 
+for testing and debugging.
+
+The pipeline can be triggered on a daily basis on the new data.
+
 
 ## Scalability of the data pipeline
 
