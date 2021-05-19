@@ -3,11 +3,19 @@
 Jun Zhu
 ___
 
-Describe your project at a high level.
+[Capital Bikeshare](https://www.capitalbikeshare.com/) is a metro DC's 
+bikeshare service in the US, with thousands of bikes and hundreds of stations 
+across 7 jurisdictions: Washington, DC.; Arlington, VA; Alexandria, VA; 
+Montgomery, MD; Prince George's County, MD; Fairfax County, VA; and the City 
+of Falls Church, VA. Designed for quick trips with convenience in mind, 
+it’s a fun and affordable way to get around. 
 
-Explain what you plan to do in the project in more detail. What data do you use? What is your end solution look like? What tools did you use? etc>
-
-Clearly state the rationale for the choice of tools and technologies for the project.
+In order to make a data-science driven business, it is critical to be able to answer 
+questions like where do riders go? When do they ride? How far do they go? 
+Which stations are most popular? What days of the week are most rides taken on? 
+How does the weather affect the activities of riders. Last but not least, 
+it would also be interesting to know how did the Coronavirus pandemic affect 
+the business during the past two years.
 
 ![](./architecture.jpg)
 
@@ -15,18 +23,9 @@ Clearly state the rationale for the choice of tools and technologies for the pro
 
 ### Captial Bikeshare trip data
 
-[Capital Bikeshare](https://www.capitalbikeshare.com/) is a metro DC's 
-bikeshare service in the US, with thousands of bikes and hundreds of stations 
-across 7 jurisdictions: Washington, DC.; Arlington, VA; Alexandria, VA; 
-Montgomery, MD; Prince George's County, MD; Fairfax County, VA; and the City 
-of Falls Church, VA. Designed for quick trips with convenience in mind, 
-it’s a fun and affordable way to get around.
-
-In order to answer questions like where do riders go? When do they ride? How
-far do they go? Which stations are most popular? What days of the week are
-most rides taken on? Capital Bikeshare provides all the 
+Capital Bikeshare provides all the 
 [trip data](https://s3.amazonaws.com/capitalbikeshare-data/index.html) in **CSV**
-format that allow to answer those questions.
+format that allow to answer the above questions.
 
 Total number of records: **9,431,284**
 
@@ -65,7 +64,22 @@ in the current directory.
 
 ## Define the Data Model
 
+A star schema is employed.
 
+### Fact table
+
+- **trip** - Essential information about every trip, for instance, start and end
+  timestamps, station ids, etc.
+
+### Dimension tables
+
+- **station** - Station name and id.
+
+- **covid** - Daily positive increase, death increase, recovered, etc.
+   
+- **weather** - Daily temperatures, wind speed, etc.
+
+For more details about the schema, please check [the SQL queries](./redshift/sql_queries.py).
 
 ## Run ETL Pipeline to Model the Data
 
@@ -95,9 +109,8 @@ cd etl
 # Copy the file to the cluster.
 scp -i ~/spark_emr.pem etl.py hadoop@<MasterPublicDnsName>:~/
 
-ssh -i ~/spark_emr.pem hadoop@<MasterPublicDnsName>
-
 # Run job
+ssh -i ~/spark_emr.pem hadoop@<MasterPublicDnsName>
 PYSPARK_PYTHON=/usr/bin/python3 spark-submit etl/etl.py
 ```
 For more details, check [here](../data_lake_with_spark).
@@ -124,21 +137,33 @@ There are two types of data checks:
 - Check the data count in each table
 - Check the date range in the trip table
 
-Caveat: debug errors when copying from S3 to Redshift:
+**Caveat**: debug errors when copying from S3 to Redshift:
 ```sql
 select message from SVL_S3LOG where query = <query id>
 ```
 
-Note: Due to the cost reason, I did not add the Spark part into the Airflow.
+**Note**: *Due to the cost reason, I did not add the Spark part into the Airflow.
 Otherwise, I have to run both EMR cluster nd Redshift cluster at the same time 
-for testing and debugging.
+for testing and debugging.*
 
-The pipeline can be triggered on a daily basis on the new data.
-
+Finally, it is recommended to run the pipeline on a daily basis on the new data.
 
 ## Scalability of the data pipeline
 
-- What if the data was increased by 100x? 
-- What if the data populates a dashboard that must be updated on a daily basis 
-  by 7am every day?
-- What if the database needed to be accessed by 100+ people?
+- *What if the data was increased by 100x?*
+
+The total amount of data used in this project is about 1.4 GB. It will be 140 GB
+when the amount is increased by 100 times. However, Redshift allows to run 
+complex analytic queries against terabytes to petabytes of structured and 
+semi-structured data. For more details, please check https://aws.amazon.com/redshift/faqs/.
+
+- *What if the data populates a dashboard that must be updated on a daily basis 
+  by 7am every day?*
+  
+The pipeline can be triggered by Airflow with different time schedules.
+
+- *What if the database needed to be accessed by 100+ people?*
+
+AWS Redshift allows a max of 500 connections and 50 concurrencies per cluster. For
+more details, please check
+https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html.
