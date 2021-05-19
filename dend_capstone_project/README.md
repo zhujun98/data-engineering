@@ -28,6 +28,8 @@ most rides taken on? Capital Bikeshare provides all the
 [trip data](https://s3.amazonaws.com/capitalbikeshare-data/index.html) in **CSV**
 format that allow to answer those questions.
 
+Total number of records: **9,431,284**
+
 #### Covid data
 
 The [COVID Tracking project](https://covidtracking.com/) collects, 
@@ -40,11 +42,15 @@ The capstone project uses `Historic values for all states` **JSON** data
 downloaded from the [data API](https://covidtracking.com/data/api). 
 Descriptions of the data fields can also be found there.
 
+Total number of records: **20,780**
+
 #### Weather data
 
 The weather data is from [NOAA](https://www.ncdc.noaa.gov/cdo-web/). I ordered
 daily observation data since 1.1.2018 from more than 100 weather stations in 
 Washington DC. The data is in **CSV** format. 
+
+Total number of records: **128,579**
 
 ## Explore and Assess the Data
 
@@ -82,15 +88,19 @@ aws s3 cp --recursive ./datasets s3://dend-capstone-project-workspace/datasets/
 
 #### Start an EMR cluster
 
-Check [here](../data_lake_with_spark).
-
 ```sh
+cd etl
+./start_emr_cluster.sh
+
 # Copy the file to the cluster.
-scp -i <path/to/the/pem/file> -r etl hadoop@<MasterPublicDnsName>:~/
+scp -i ~/spark_emr.pem etl.py hadoop@<MasterPublicDnsName>:~/
+
+ssh -i ~/spark_emr.pem hadoop@<MasterPublicDnsName>
 
 # Run job
-spark-submit etl/etl.py
+PYSPARK_PYTHON=/usr/bin/python3 spark-submit etl/etl.py
 ```
+For more details, check [here](../data_lake_with_spark).
 
 ### Start an AWS Redshift cluster and create tables
 
@@ -109,9 +119,10 @@ docker-compose up
 
 #### Trigger the data pipeline
 
-- Integrity constraints on the relational database (e.g., unique key, data type, etc.)
-- Unit tests for the scripts to ensure they are doing the right thing
-- Source/Count checks to ensure completeness
+Debug errors when copying from S3 to Redshift:
+```sql
+select message from SVL_S3LOG where query = <query id>
+```
 
 *Propose how often the data should be updated and why.*
 

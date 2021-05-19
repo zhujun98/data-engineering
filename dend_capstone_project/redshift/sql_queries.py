@@ -1,20 +1,20 @@
 trip_table_create = ("""
     CREATE TABLE IF NOT EXISTS trip (
-        tid                 integer     PRIMARY KEY,
         ride_id             varchar,
         rideable_type       varchar,
         started_at          timestamp   NOT NULL,
         ended_at            timestamp   NOT NULL,
-        start_station_id    integer     NOT NULL,
-        end_station_id      integer     NOT NULL,
+        start_station_id    varchar     NOT NULL,
+        end_station_id      varchar     NOT NULL,
         member_casual       varchar     NOT NULL,
+        tid                 bigint      PRIMARY KEY,
         start_date          date        NOT NULL
     )
 """)
 
 station_table_create = ("""
     CREATE TABLE IF NOT EXISTS station (
-        station_id     integer      PRIMARY KEY,
+        station_id     varchar      PRIMARY KEY,
         station_name   varchar      NOT NULL
     )
 """)
@@ -22,22 +22,22 @@ station_table_create = ("""
 covid_table_create = ("""
     CREATE TABLE IF NOT EXISTS covid (
         date                    date        PRIMARY KEY, 
-        death                   integer     NOT NULL, 
-        deathIncrease           integer     NOT NULL, 
-        hospitalizedCurrently   integer     NOT NULL, 
-        positive                integer     NOT NULL, 
-        positiveIncrease        integer     NOT NULL, 
-        recovered               integer     NOT NULL
+        death                   bigint      NOT NULL, 
+        deathIncrease           bigint      NOT NULL, 
+        hospitalizedCurrently   bigint      NOT NULL, 
+        positive                bigint      NOT NULL, 
+        positiveIncrease        bigint      NOT NULL, 
+        recovered               bigint      NOT NULL
     )
 """)
 
 weather_table_create = ("""
     CREATE TABLE IF NOT EXISTS weather (
         DATE    date        PRIMARY KEY,    
-        AWND    decimal,
-        TAVG    decimal,
-        TMAX    decimal,
-        TMIN    decimal,
+        AWND    double precision,
+        TAVG    double precision,
+        TMAX    double precision,
+        TMIN    double precision,
         WT01    bool,
         WT02    bool,
         WT03    bool,

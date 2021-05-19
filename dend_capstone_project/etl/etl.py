@@ -22,9 +22,9 @@ def process_trip_data(input_data_path, output_data_path):
         StructField('started_at', TimestampType()),
         StructField('ended_at', TimestampType()),
         StructField('start_station_name', StringType()),
-        StructField('start_station_id', LongType()),
+        StructField('start_station_id', StringType()),
         StructField('end_station_name', StringType()),
-        StructField('end_station_id', LongType()),
+        StructField('end_station_id', StringType()),
         StructField('start_lat', DoubleType()),
         StructField('start_lng', DoubleType()),
         StructField('end_lat', DoubleType()),
@@ -40,9 +40,9 @@ def process_trip_data(input_data_path, output_data_path):
         StructField('Duration', DoubleType()),
         StructField('Start date', TimestampType()),
         StructField('End date', TimestampType()),
-        StructField('Start station number', LongType()),
+        StructField('Start station number', StringType()),
         StructField('Start station', StringType()),
-        StructField('End station number', LongType()),
+        StructField('End station number', StringType()),
         StructField('End station', StringType()),
         StructField('Bike number', StringType()),
         StructField("Member type", StringType())
@@ -63,7 +63,7 @@ def process_trip_data(input_data_path, output_data_path):
                              "end_station_name").distinct()).distinct().sort(
         "station_id", ascending=True).dropna(
         how="any", subset=["station_id"]).filter(
-        F.col("station_id") != 0).dropDuplicates(subset=["station_id"])
+        F.col("station_id") != "00000").dropDuplicates(subset=["station_id"])
 
     trip_data = trip_data_old.select(
         F.lit(None).alias("ride_id").cast(StringType()),
@@ -80,7 +80,7 @@ def process_trip_data(input_data_path, output_data_path):
     # Clean up.
     trip_data = trip_data.dropna(
         how="any", subset=["start_station_id", "end_station_id"]).filter(
-        (F.col("start_station_id") != 0) & (F.col("end_station_id") != 0))
+        (F.col("start_station_id") != "00000") & (F.col("end_station_id") != "00000"))
 
     # Add primary key "tid" and foreign key "start_date".
     # FIXME: monotonically_increase_id() does not return a sequence!

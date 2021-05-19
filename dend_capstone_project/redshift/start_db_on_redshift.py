@@ -149,5 +149,5 @@ if __name__ == "__main__":
     if args.delete:
         delete_redshift_cluster()
     else:
-        # create_redshift_cluster()
+        create_redshift_cluster()
         create_tables()
