@@ -3,6 +3,20 @@
 Jun Zhu
 ___
 
+**Table of contents:**
+1. Scope the project and gather data
+2. Explore and access the data
+3. Define the data model
+4. Run ETL to model the data
+5. Reflection
+
+
+## Step 1: Scope the project and gather data
+
+![](./architecture.jpg)
+
+### Introduction
+
 [Capital Bikeshare](https://www.capitalbikeshare.com/) is a metro DC's 
 bikeshare service in the US, with thousands of bikes and hundreds of stations 
 across 7 jurisdictions: Washington, DC.; Arlington, VA; Alexandria, VA; 
@@ -17,11 +31,9 @@ How does the weather affect the activities of riders. Last but not least,
 it would also be interesting to know how did the Coronavirus pandemic affect 
 the business during the past two years.
 
-![](./architecture.jpg)
+### Datasets
 
-## Datasets
-
-### Captial Bikeshare trip data
+#### Captial Bikeshare trip data
 
 Capital Bikeshare provides all the 
 [trip data](https://s3.amazonaws.com/capitalbikeshare-data/index.html) in **CSV**
@@ -51,7 +63,8 @@ Washington DC. The data is in **CSV** format.
 
 Total number of records: **128,579**
 
-## Explore and Assess the Data
+
+## Step 2: Explore and access the data
 
 Details can be found in the Jupyter notebook 
 [workspace/data_exploration.ipynb](workspace/data_exploration.ipynb).
@@ -62,28 +75,74 @@ Check the Docker Compose file [here](../dev_envs/spark_docker). Remember to chan
 the `WORKSPACE` in the [env](../dev_envs/spark_docker/.env) file to the `workspace`
 in the current directory.
 
-## Define the Data Model
 
-A star schema is employed.
+## Step 3: Define the data model
+
+A star schema was chosen in this project. The trip data is essential to the
+business and thus the `trip` table is the fact table. Two of the dimension tables, 
+`covid` table and `weather` table, could contain important information which 
+acounts for the daily fluctuation of the business. Another dimension table,
+`station` table, could also help since addresses of stations do matter.
+
+
+![](./data_model.png)
 
 ### Fact table
 
-- **trip** - Essential information about every trip, for instance, start and end
-  timestamps, station ids, etc.
+|Field Name|Description|
+|---|---|
+|ride_id|Ride ID (only available after 2020.05)|
+|rideable_type|Rideable type (only available after 2020.05)|
+|started_at|Start time of the trip|
+|ended_at|End time of the trip|
+|start_station_id|Start station ID|
+|end_station_id|End station ID|
+|member_casual|Customer type (member or casual)|
+|tid|Unique trip ID|
+|start_date|Start date of the trip|
 
 ### Dimension tables
 
-- **station** - Station name and id.
+#### Station table
 
-- **covid** - Daily positive increase, death increase, recovered, etc.
-   
-- **weather** - Daily temperatures, wind speed, etc.
+|Field Name|Description|
+|---|---|
+|station_id|Station ID|
+|station_name|Station name (address)|
 
-For more details about the schema, please check [the SQL queries](./redshift/sql_queries.py).
+#### Covid table
 
-## Run ETL Pipeline to Model the Data
+|Field Name|Description|
+|---|---|
+|date|Date on which data was collected by The COVID Tracking Project|
+|deathIncrease|Daily increase in death, calculated from the previous day’s value|
+|hospitalizedCurrently|Individuals who are currently hospitalized with COVID-19|
+|positive|Total number of confirmed plus probable cases of COVID-19 reported by the state or territory|
+|positiveIncrease|The daily increase in API field positive, which measures Cases (confirmed plus probable) calculated based on the previous day’s value|
+|recovered|Total number of people that are identified as recovered from COVID-19|
 
-#### Test on a standalone Spark cluster locally (optional)
+#### Weather table
+
+|Field Name|Description|
+|---|---|
+|DATE|Date of the record|
+|AWND|Average daily wind speed (meters per second)|
+|TAVG|Average of hourly values|
+|TMAX|Highest hourly temperature|
+|TMIN|Lowest hourly temperature|
+|WT01|Fog, ice fog, or freezing fog (may include heavy fog)|
+|WT02|Heavy fog or heaving freezing fog (not always distinguished from fog)|
+|WT03|Thunder|
+|WT04|Ice pellets, sleet, snow pellets, or small hail|
+|WT05|Hail (may include small hail)|
+|WT06|Glaze or rime|
+|WT08|Smoke or haze|
+|WT11|High or damaging winds|
+
+
+## Step 4: Run ETL to model the data
+
+### Test on a standalone Spark cluster locally (optional)
 
 ```sh
 sudo docker build -t capstone-project-spark-cluster .
@@ -94,13 +153,13 @@ sudo docker run --network spark_docker_default -v ${PWD}/etl:/app/ \
 spark-submit --master spark://spark-master:7077 etl.py --local
 ```
 
-#### Copy datasets to S3
+### Copy datasets to S3
 
 ```sh
 aws s3 cp --recursive ./datasets s3://dend-capstone-project-workspace/datasets/
 ```
 
-#### Start an EMR cluster
+### Start an EMR cluster
 
 ```sh
 cd etl
@@ -121,7 +180,7 @@ For more details, check [here](../data_lake_with_spark).
 python redshift/start_db_on_redshift.py
 ```
 
-#### Run Apache Airflow in Docker
+### Run Apache Airflow in Docker
 
 Copy the [Docker Compose file](../dev_envs/airflow_docker/docker-compose.yaml)
 into the `airflow` directory and start Airflow server by
@@ -148,7 +207,7 @@ for testing and debugging.*
 
 Finally, it is recommended to run the pipeline on a daily basis on the new data.
 
-## Scalability of the data pipeline
+## Step 5: Reflection
 
 - *What if the data was increased by 100x?*
 
@@ -167,3 +226,7 @@ The pipeline can be triggered by Airflow with different time schedules.
 AWS Redshift allows a max of 500 connections and 50 concurrencies per cluster. For
 more details, please check
 https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html.
+
+Alternatively, if users do not need to perform insert and update, and they only 
+need to access some queries, then the data can be periodically copied to a NoSQL 
+server such as Cassandra.
