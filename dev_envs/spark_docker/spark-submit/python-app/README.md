@@ -1,4 +1,4 @@
-## Test Spark on a standalone Spark cluster locally
+## Test submitting Python job on a standalone Spark cluster locally
 
 ```sh
 sudo docker build -t spark-python-submit-test .

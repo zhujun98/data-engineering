@@ -5,7 +5,7 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
-public class Hello {
+public class LowerCase {
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder().appName("spark_test").getOrCreate();
 
