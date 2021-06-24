@@ -25,4 +25,4 @@ docker-compose down
 
 * [Python example](spark-submit/python-app)
 * [Java example](spark-submit/java-app)
-* [Scala example](spark-submit/scala)
+* [Scala example](spark-submit/scala-app)
