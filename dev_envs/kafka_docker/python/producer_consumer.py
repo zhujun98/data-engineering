@@ -29,6 +29,19 @@ class Purchase:
         )
 
 
+async def produce(broker_url, topic, *, count):
+    conf = {
+        "bootstrap.servers": broker_url,
+        "client.id": socket.gethostname()
+    }
+
+    p = Producer(conf)
+    for _ in range(count):
+        p.produce(topic, value=Purchase().serialize())
+        if count % 1000 == 0:
+            print("..............")
+
+
 def produce_sync(broker_url, topic, *, count):
     """Produces data synchronously into the Kafka Topic"""
     conf = {
@@ -42,7 +55,7 @@ def produce_sync(broker_url, topic, *, count):
         p.flush()
 
 
-def consumer_sync(broker_url, topic, *, partitions):
+def consume(broker_url, topic, *, partitions):
     conf = {
         "bootstrap.servers": broker_url,
         "group.id": "Jun"
@@ -90,6 +103,7 @@ def maybe_create_topic(broker_url, topic, *, partitions=1):
         for _, future in futures.items():
             try:
                 future.result()
+                print("New topic created!")
             except Exception as e:
                 pass
 
@@ -102,10 +116,7 @@ if __name__ == "__main__":
                         action='store_true',
                         help="True for asynchronous and False for synchronous "
                              "producer and consumer")
-    parser.add_argument('--consumer',
-                        action='store_true',
-                        help='False for producer and True for consumer '
-                             '(used only for synchronous producer and consumer)')
+    parser.add_argument('--produce', type=int, default=None)
 
     args = parser.parse_args()
 
@@ -115,16 +126,15 @@ if __name__ == "__main__":
     BROKER_URL = config['CLUSTER']['BROKER_URL']
     TOPIC = config['TOPIC']['NAME']
     PARTITIONS = int(config['TOPIC']['PARTITIONS'])
-    MAX_MESSAGES = int(config['TOPIC']['MAX_MESSAGES'])
 
     maybe_create_topic(BROKER_URL, TOPIC, partitions=PARTITIONS)
     try:
-        if not args.sync:
-            raise NotImplemented
+        if args.produce is None:
+            consume(BROKER_URL, TOPIC, partitions=PARTITIONS)
         else:
-            if not args.consumer:
-                produce_sync(BROKER_URL, TOPIC, count=MAX_MESSAGES)
+            if not args.sync:
+                produce(BROKER_URL, TOPIC, count=args.produce)
             else:
-                consumer_sync(BROKER_URL, TOPIC, partitions=PARTITIONS)
+                produce_sync(BROKER_URL, TOPIC, count=args.produce)
     except KeyboardInterrupt as e:
         print("shutting down")
