@@ -1,9 +1,12 @@
 import argparse
+import asyncio
 import configparser
 from dataclasses import dataclass, field
+import functools
 import json
 import socket
 import random
+import time
 
 from confluent_kafka import Consumer, Producer, KafkaError, KafkaException
 from confluent_kafka.admin import AdminClient, NewTopic
@@ -29,39 +32,74 @@ class Purchase:
         )
 
 
-async def produce(broker_url, topic, *, count):
-    conf = {
+def _producer_configurations(broker_url):
+    return {
         "bootstrap.servers": broker_url,
-        "client.id": socket.gethostname()
+        # for better debugging experience
+        "client.id": socket.gethostname(),
+        "acks": "1",
     }
 
-    p = Producer(conf)
-    for _ in range(count):
-        p.produce(topic, value=Purchase().serialize())
-        if count % 1000 == 0:
-            print("..............")
+
+async def produce(broker_url, topic, *, num_messages):
+    p = Producer(_producer_configurations(broker_url))
+
+    produce_func = functools.partial(p.produce, topic,
+                                     value=Purchase().serialize())
+    loop = asyncio.get_running_loop()
+    t0 = time.time()
+    for i in range(1, num_messages+1):
+        await loop.run_in_executor(None, produce_func)
+        if i % (num_messages // 10) == 0:
+            t1 = time.time()
+            print(f"Produced {i} messages. Time elapsed: {t1 - t0:.2f} s")
+            t0 = t1
+        await asyncio.sleep(0.001)
+    p.flush()
 
 
-def produce_sync(broker_url, topic, *, count):
+def produce_sync(broker_url, topic, *, num_messages):
     """Produces data synchronously into the Kafka Topic"""
-    conf = {
-        "bootstrap.servers": broker_url,
-        "client.id": socket.gethostname()
-    }
-
-    p = Producer(conf)
-    for _ in range(count):
+    p = Producer(_producer_configurations(broker_url))
+    t0 = time.time()
+    for i in range(1, num_messages+1):
         p.produce(topic, value=Purchase().serialize())
         p.flush()
+        if i % (num_messages // 10) == 0:
+            t1 = time.time()
+            print(f"Produced {i} messages. Time elapsed: {t1 - t0:.2f} s")
+            t0 = t1
 
 
-def consume(broker_url, topic, *, partitions):
-    conf = {
+def _cosumer_configurations(broker_url):
+    return {
         "bootstrap.servers": broker_url,
-        "group.id": "Jun"
+        "group.id": "A",  # mandatory
     }
 
-    c = Consumer(conf)
+
+async def consume(broker_url, topic, batch_size=1, timeout=0.1, *, partitions):
+    c = Consumer(_cosumer_configurations(broker_url))
+    c.subscribe([topic])
+    consume_func = functools.partial(c.consume, batch_size, timeout=timeout)
+    loop = asyncio.get_running_loop()
+    try:
+        while True:
+            msgs = await loop.run_in_executor(None, consume_func)
+            if len(msgs) > 0:
+                msg0 = msgs[0]
+                assert (msg0.topic() == topic)
+                assert (msg0.key() is None)
+                assert (0 <= msg0.partition() <= partitions)
+                print(f"Received {len(msgs)} messages, "
+                      f"the first message: {json.loads(msg0.value())}")
+            await asyncio.sleep(0.001)
+    finally:
+        c.close()
+
+
+def consume_sync(broker_url, topic, *, partitions):
+    c = Consumer(_cosumer_configurations(broker_url))
     c.subscribe([topic])
     try:
         while True:
@@ -82,7 +120,6 @@ def consume(broker_url, topic, *, partitions):
                           f"at offset {msg.offset()}")
                 else:
                     raise KafkaException(msg_err)
-
     finally:
         c.close()
 
@@ -98,7 +135,11 @@ def maybe_create_topic(broker_url, topic, *, partitions=1):
         futures = client.create_topics(
             [NewTopic(topic=topic,
                       num_partitions=partitions,
-                      replication_factor=1)]
+                      replication_factor=1,  # cannot be larger than No. brokers
+                      config={
+                          # fast compression and decompression
+                          "compression.type": "lz4"})
+             ]
         )
         for _, future in futures.items():
             try:
@@ -129,12 +170,19 @@ if __name__ == "__main__":
 
     maybe_create_topic(BROKER_URL, TOPIC, partitions=PARTITIONS)
     try:
-        if args.produce is None:
-            consume(BROKER_URL, TOPIC, partitions=PARTITIONS)
-        else:
-            if not args.sync:
-                produce(BROKER_URL, TOPIC, count=args.produce)
+        if args.sync:
+            if args.produce is None:
+                consume_sync(BROKER_URL, TOPIC, partitions=PARTITIONS)
             else:
-                produce_sync(BROKER_URL, TOPIC, count=args.produce)
+                produce_sync(BROKER_URL, TOPIC, num_messages=args.produce)
+        else:
+            asyncio.run(asyncio.wait([
+                produce(BROKER_URL, TOPIC,
+                        num_messages=args.produce),
+                consume(BROKER_URL, TOPIC,
+                        batch_size=args.produce // 10,
+                        partitions=PARTITIONS)
+            ]))
+
     except KeyboardInterrupt as e:
         print("shutting down")

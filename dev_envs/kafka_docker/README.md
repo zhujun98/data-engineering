@@ -52,7 +52,13 @@ python python/producer_consumer.py --produce 5000 --sync
 ```
 ```sh
 # Terminal 2
-python python/producer_consumer.py
+python python/producer_consumer.py --sync
+```
+
+Run asynchronous producer and consumer:
+
+```sh
+python python/producer_consumer.py --produce 5000
 ```
 
 ## Java API
