@@ -33,5 +33,5 @@ Jun Zhu
 
 ## Udacity Data Streaming Nanodegree
 
-- [Optimize Public Transportation with Kafka](./optimize_public_transportation_with_kafka)
-- [Evaluate Human Balance with Spark Streaming](./evaluate_human_balance_with_spark_streaming)
+- [Optimize Public Transportation with Kafka](opt_pub_trans_with_kafka)
+- [Evaluate Human Balance with Spark Streaming](./eval_human_balance_with_spark_streaming)
