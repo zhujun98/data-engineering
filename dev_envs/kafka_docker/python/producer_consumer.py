@@ -177,8 +177,7 @@ if __name__ == "__main__":
                 produce_sync(BROKER_URL, TOPIC, num_messages=args.produce)
         else:
             asyncio.run(asyncio.wait([
-                produce(BROKER_URL, TOPIC,
-                        num_messages=args.produce),
+                produce(BROKER_URL, TOPIC, num_messages=args.produce),
                 consume(BROKER_URL, TOPIC,
                         batch_size=args.produce // 10,
                         partitions=PARTITIONS)
