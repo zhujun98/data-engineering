@@ -1,6 +1,7 @@
 import asyncio
 import configparser
 from dataclasses import asdict, dataclass, field
+import os.path as osp
 import socket
 import random
 
@@ -100,13 +101,12 @@ async def consume(broker_url, topic, schema_registry_url):
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(osp.join(osp.dirname(__file__), '..', 'config.ini'))
 
     BROKER_URL = config['CLUSTER']['BROKER_URL']
     SCHEMA_REGISTRY_URL = config['CLUSTER']['SCHEMA_REGISTRY_URL']
 
-    TOPIC = config['TOPIC']['NAME']
-    PARTITIONS = int(config['TOPIC']['PARTITIONS'])
+    TOPIC = config['TOPIC2']['NAME']
 
     n_msgs = 1000
     asyncio.run(asyncio.wait([

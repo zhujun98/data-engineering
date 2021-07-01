@@ -4,6 +4,7 @@ import configparser
 from dataclasses import dataclass, field
 import functools
 import json
+import os.path as osp
 import socket
 import random
 import time
@@ -162,11 +163,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(osp.join(osp.dirname(__file__), '..', 'config.ini'))
 
     BROKER_URL = config['CLUSTER']['BROKER_URL']
-    TOPIC = config['TOPIC']['NAME']
-    PARTITIONS = int(config['TOPIC']['PARTITIONS'])
+    TOPIC = config['TOPIC1']['NAME']
+    PARTITIONS = int(config['TOPIC1']['PARTITIONS'])
 
     maybe_create_topic(BROKER_URL, TOPIC, partitions=PARTITIONS)
     try:
