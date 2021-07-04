@@ -47,11 +47,11 @@ pip install -r requirements.txt
 
 Run synchronous producer and consumer:
 ```sh
-# Terminal 1
+# terminal 1
 python python/producer_consumer.py --produce 5000 --sync
 ```
 ```sh
-# Terminal 2
+# terminal 2
 python python/producer_consumer.py --sync
 ```
 
@@ -59,6 +59,21 @@ Run asynchronous producer and consumer:
 
 ```sh
 python python/producer_consumer.py --produce 5000
+```
+
+Run asynchronous producer and consumer with Avro schema:
+
+```sh
+python python/producer_consumer_with_avro.py
+```
+
+Use a Faust app as consumer:
+
+```sh
+# terminal 1
+python python/producer_consumer.py --produce 1000 --sync
+# terminal 2
+python python/faust_app.py
 ```
 
 ## Java API

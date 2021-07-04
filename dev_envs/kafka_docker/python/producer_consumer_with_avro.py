@@ -106,6 +106,7 @@ if __name__ == "__main__":
     BROKER_URL = config['CLUSTER']['BROKER_URL']
     SCHEMA_REGISTRY_URL = config['CLUSTER']['SCHEMA_REGISTRY_URL']
 
+    # Note: Topic will be automatically create if not existing yet.
     TOPIC = config['TOPIC2']['NAME']
 
     n_msgs = 1000
