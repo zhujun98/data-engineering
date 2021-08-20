@@ -9,19 +9,21 @@ logger = logging.getLogger(__name__)
 class Train:
     """Defines CTA Train Model"""
 
-    status = IntEnum("status", "out_of_service in_service broken_down", start=0)
+    class Status(IntEnum):
+        OUT_OF_SERVICE = 0
+        IN_SERVICE = 1
+        BROKEN_DOWN = 2
 
-    def __init__(self, train_id, status):
-        self.train_id = train_id
-        self.status = status
-        if self.status is None:
-            self.status = Train.status.out_of_service
+    def __init__(self, train_id: str, status: int = 0):
+        self._train_id = train_id
+        self._status = self.Status(status)
+
+    def set_status(self, status: int):
+        self._status = self.Status(status)
 
     def __str__(self):
-        return f"Train ID {self.train_id} is {self.status.name.replace('_', ' ')}"
+        return f"Train ID {self._train_id} is " \
+               f"{self._status.name.replace('_', ' ')}"
 
     def __repr__(self):
         return str(self)
-
-    def broken(self):
-        return self.status == Train.status.broken_down

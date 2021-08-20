@@ -3,7 +3,8 @@ import collections
 from enum import IntEnum
 import logging
 
-from models import Station, Train
+from .station import Station
+from .train import Train
 
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class Line:
         for train_id in range(self.num_trains):
             tid = str(train_id).zfill(3)
             train = Train(
-                f"{self.color.name[0].upper()}L{tid}", Train.status.in_service
+                f"{self.color.name[0].upper()}L{tid}", Train.Status.IN_SERVICE
             )
             trains.append(train)
 

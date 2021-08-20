@@ -5,22 +5,22 @@ import random
 
 import pandas as pd
 
-from models.producer import Producer
-
-
 logger = logging.getLogger(__name__)
 
 
 class TurnstileHardware:
-    curve_df = None
-    seed_df = None
+    curve_df = pd.read_csv(
+        f"{Path(__file__).parents[1]}/data/ridership_curve.csv"
+    )
+    seed_df = pd.read_csv(
+        f"{Path(__file__).parents[1]}/data/ridership_seed.csv"
+    )
 
     def __init__(self, station):
-        """Create the Turnstile"""
         self.station = station
-        TurnstileHardware._load_data()
-        self.metrics_df = TurnstileHardware.seed_df[
-            TurnstileHardware.seed_df["station_id"] == station.station_id
+
+        self.metrics_df = self.seed_df[
+            self.seed_df["station_id"] == station.station_id
         ]
         self.weekday_ridership = int(
             round(self.metrics_df.iloc[0]["avg_weekday_rides"])
@@ -32,22 +32,9 @@ class TurnstileHardware:
             round(self.metrics_df.iloc[0]["avg_sunday-holiday_rides"])
         )
 
-    @classmethod
-    def _load_data(cls):
-        if cls.curve_df is None:
-            cls.curve_df = pd.read_csv(
-                f"{Path(__file__).parents[1]}/data/ridership_curve.csv"
-            )
-        if cls.seed_df is None:
-            cls.seed_df = pd.read_csv(
-                f"{Path(__file__).parents[1]}/data/ridership_seed.csv"
-            )
-
     def get_entries(self, timestamp, time_step):
-        """Returns the number of turnstile entries for the given timeframe"""
-        hour_curve = TurnstileHardware.curve_df[
-            TurnstileHardware.curve_df["hour"] == timestamp.hour
-        ]
+        """Returns the number of turnstile entries for the given timeframe."""
+        hour_curve = self.curve_df[self.curve_df["hour"] == timestamp.hour]
         ratio = hour_curve.iloc[0]["ridership_ratio"]
         total_steps = int(60 / (60 / time_step.total_seconds()))
 

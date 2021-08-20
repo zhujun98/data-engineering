@@ -8,7 +8,7 @@ import urllib.parse
 
 import requests
 
-from models.producer import Producer
+from .producer import Producer
 
 
 logger = logging.getLogger(__name__)
@@ -17,58 +17,51 @@ logger = logging.getLogger(__name__)
 class Weather(Producer):
     """Defines a simulated weather model"""
 
-    status = IntEnum(
-        "status", "sunny partly_cloudy cloudy windy precipitation", start=0
-    )
+    class Status(IntEnum):
+        SUNNY = 0
+        PARTLY_CLOUDY = 1
+        CLOUDY = 2
+        WINDY = 3
+        PRECIPITATION = 4
 
     rest_proxy_url = "http://localhost:8082"
 
     key_schema = None
     value_schema = None
 
-    winter_months = set((0, 1, 2, 3, 10, 11))
-    summer_months = set((6, 7, 8))
+    winter_months = {0, 1, 2, 3, 10, 11}
+    summer_months = {6, 7, 8}
 
     def __init__(self, month):
-        #
-        #
-        # TODO: Complete the below by deciding on a topic name, number of partitions, and number of
-        # replicas
-        #
-        #
-        super().__init__(
-            "weather", # TODO: Come up with a better topic name
-            key_schema=Weather.key_schema,
-            value_schema=Weather.value_schema,
-        )
+        super().__init__("weather", # TODO: Come up with a better topic name
+                         key_schema=None,
+                         value_schema=None)
 
-        self.status = Weather.status.sunny
-        self.temp = 70.0
-        if month in Weather.winter_months:
+        self._status = self.Status.SUNNY
+        if month in self.winter_months:
             self.temp = 40.0
-        elif month in Weather.summer_months:
+        elif month in self.summer_months:
             self.temp = 85.0
+        else:
+            self.temp = 70.0
 
-        if Weather.key_schema is None:
+        if self.key_schema is None:
             with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as f:
-                Weather.key_schema = json.load(f)
+                self.key_schema = json.load(f)
 
-        #
-        # TODO: Define this value schema in `schemas/weather_value.json
-        #
-        if Weather.value_schema is None:
+        if self.value_schema is None:
             with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as f:
-                Weather.value_schema = json.load(f)
+                self.value_schema = json.load(f)
 
     def _set_weather(self, month):
         """Returns the current weather"""
         mode = 0.0
-        if month in Weather.winter_months:
+        if month in self.winter_months:
             mode = -1.0
-        elif month in Weather.summer_months:
+        elif month in self.summer_months:
             mode = 1.0
         self.temp += min(max(-20.0, random.triangular(-10.0, 10.0, mode)), 100.0)
-        self.status = random.choice(list(Weather.status))
+        self._status = random.choice(list(self.Status))
 
     def run(self, month):
         self._set_weather(month)
@@ -108,5 +101,5 @@ class Weather(Producer):
         logger.debug(
             "sent weather data to kafka, temp: %s, status: %s",
             self.temp,
-            self.status.name,
+            self._status.name,
         )
