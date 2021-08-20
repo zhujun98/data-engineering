@@ -1,13 +1,18 @@
 # Public Transit Status with Apache Kafka
 
-The Chicago Transit Authority (CTA) has asked us to develop a dashboard displaying system status for its commuters. We have decided to use Kafka and ecosystem tools like REST Proxy and Kafka Connect to accomplish this task.
+The Chicago Transit Authority (CTA) has asked us to develop a dashboard 
+displaying system status for its commuters. We have decided to use Kafka 
+and ecosystem tools like REST Proxy and Kafka Connect to accomplish this task.
 
 Our architecture will look like so:
 
 ![Project Architecture](images/archetecture.png)
 
 ### Step 1: Create Kafka Producers
-The first step in our plan is to configure the train stations to emit some of the events that we need. The CTA has placed a sensor on each side of every train station that can be programmed to take an action whenever a train arrives at the station.
+The first step in our plan is to configure the train stations to emit some of 
+the events that we need. The CTA has placed a sensor on each side of every 
+train station that can be programmed to take an action whenever a train arrives 
+at the station.
 
 To accomplish this, you must complete the following tasks:
 
@@ -95,21 +100,14 @@ To accomplish this, you must complete the following tasks:
 1. Complete the code in `consumers/models/weather.py`
 1. Complete the code in `consumers/models/station.py`
 
-### Documentation
-In addition to the course content you have already reviewed, you may find the following examples and documentation helpful in completing this assignment:
-
-* [Confluent Python Client Documentation](https://docs.confluent.io/current/clients/confluent-kafka-python/#)
-* [Confluent Python Client Usage and Examples](https://github.com/confluentinc/confluent-kafka-python#usage)
-* [REST Proxy API Reference](https://docs.confluent.io/current/kafka-rest/api.html#post--topics-(string-topic_name))
-* [Kafka Connect JDBC Source Connector Configuration Options](https://docs.confluent.io/current/connect/kafka-connect-jdbc/source-connector/source_config_options.html)
-
 ## Running and Testing
 
-To run the simulation, you must first start up the Kafka ecosystem on their machine utilizing Docker Compose.
+To run the simulation, you must first start up the Kafka ecosystem in your
+local machine by:
 
-```%> docker-compose up```
-
-Docker compose will take a 3-5 minutes to start, depending on your hardware. Please be patient and wait for the docker-compose logs to slow down or stop before beginning the simulation.
+```bash
+docker-compose up
+```
 
 Once docker-compose is ready, the following services will be available:
 
@@ -126,15 +124,25 @@ Once docker-compose is ready, the following services will be available:
 | KSQL | [http://localhost:8088](http://localhost:8088) | http://ksql:8088 |
 | PostgreSQL | `jdbc:postgresql://localhost:5432/cta` | `jdbc:postgresql://postgres:5432/cta` | `cta_admin` | `chicago` |
 
-Note that to access these services from your own machine, you will always use the `Host URL` column.
-
-When configuring services that run within Docker Compose, like **Kafka Connect you must use the Docker URL**. When you configure the JDBC Source Kafka Connector, for example, you will want to use the value from the `Docker URL` column.
+If all the services started correctly, you should be able to see the following
+list of topics:
+```
+__confluent.support.metrics
+__consumer_offsets
+_confluent-ksql-ksql_service_docker_command_topic
+_schemas
+connect-config
+connect-offset
+connect-status
+```
+after typing
+```sh
+docker exec broker kafka-topics --zookeeper zookeeper:2181 --list
+```
 
 ### Running the Simulation
 
-There are two pieces to the simulation, the `producer` and `consumer`. As you develop each piece of the code, it is recommended that you only run one piece of the project at a time.
-
-However, when you are ready to verify the end-to-end system prior to submission, it is critical that you open a terminal window for each piece and run them at the same time. **If you do not run both the producer and consumer at the same time you will not be able to successfully complete the project**.
+There are two pieces to the simulation, the `producer` and `consumer`. 
 
 #### To run the `producer`:
 
@@ -169,5 +177,3 @@ Once the simulation is running, you may hit `Ctrl+C` at any time to exit.
 3. `. venv/bin/activate`
 4. `pip install -r requirements.txt`
 5. `python server.py`
-
-Once the server is running, you may hit `Ctrl+C` at any time to exit.
