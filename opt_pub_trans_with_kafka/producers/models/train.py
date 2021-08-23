@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class Train:
-    """Defines CTA Train Model"""
+    """Defines CTA Train Model."""
 
     class Status(IntEnum):
         OUT_OF_SERVICE = 0

@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 class Turnstile(Producer):
-    key_schema = None
-    value_schema = None
-    # key_schema = avro.load(
-    #     f"{Path(__file__).parents[0]}/schemas/turnstile_key.json")
-    #
-    # value_schema = avro.load(
-    #    f"{Path(__file__).parents[0]}/schemas/turnstile_value.json"
-    # )
+    """"""
+
+    key_schema = avro.load(
+        f"{Path(__file__).parents[0]}/schemas/turnstile_key.json")
+
+    value_schema = avro.load(
+       f"{Path(__file__).parents[0]}/schemas/turnstile_value.json"
+    )
 
     curve_df = pd.read_csv(
         f"{Path(__file__).parents[1]}/data/ridership_curve.csv"

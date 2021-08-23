@@ -27,13 +27,10 @@ class Weather(Producer):
 
     rest_proxy_url = "http://localhost:8082"
 
-    key_schema = None
-    value_schema = None
-
-    # with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as fp:
-    #     key_schema = json.load(fp)
-    # with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as fp:
-    #     value_schema = json.load(fp)
+    with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as fp:
+        key_schema = json.load(fp)
+    with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as fp:
+        value_schema = json.load(fp)
 
     winter_months = {0, 1, 2, 3, 10, 11}
     summer_months = {6, 7, 8}
