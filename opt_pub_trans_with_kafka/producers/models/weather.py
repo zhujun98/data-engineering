@@ -3,6 +3,7 @@ from enum import IntEnum
 import json
 import logging
 from pathlib import Path
+import datetime
 import random
 import urllib.parse
 
@@ -29,42 +30,50 @@ class Weather(Producer):
     key_schema = None
     value_schema = None
 
+    # with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as fp:
+    #     key_schema = json.load(fp)
+    # with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as fp:
+    #     value_schema = json.load(fp)
+
     winter_months = {0, 1, 2, 3, 10, 11}
     summer_months = {6, 7, 8}
 
-    def __init__(self, month):
+    def __init__(self):
         super().__init__("weather", # TODO: Come up with a better topic name
-                         key_schema=None,
-                         value_schema=None)
+                         key_schema=self.key_schema,
+                         value_schema=self.value_schema)
 
-        self._status = self.Status.SUNNY
-        if month in self.winter_months:
-            self.temp = 40.0
-        elif month in self.summer_months:
-            self.temp = 85.0
-        else:
-            self.temp = 70.0
+        self._status = None
+        self._temp = None
 
-        if self.key_schema is None:
-            with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as f:
-                self.key_schema = json.load(f)
+        self._initialized = False
 
-        if self.value_schema is None:
-            with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as f:
-                self.value_schema = json.load(f)
+    def _update(self, month: int):
+        if not self._initialized:
+            if month in self.winter_months:
+                self._temp = 40.0
+            elif month in self.summer_months:
+                self._temp = 85.0
+            else:
+                self._temp = 70.0
 
-    def _set_weather(self, month):
-        """Returns the current weather"""
+            self._status = random.choice(list(self.Status))
+
+            self._initialized = True
+
+        # This algorithm is from the original code ...
         mode = 0.0
         if month in self.winter_months:
             mode = -1.0
         elif month in self.summer_months:
             mode = 1.0
-        self.temp += min(max(-20.0, random.triangular(-10.0, 10.0, mode)), 100.0)
+        self._temp += min(max(-20.0, random.triangular(-10.0, 10.0, mode)),
+                          100.0)
+
         self._status = random.choice(list(self.Status))
 
-    def run(self, month):
-        self._set_weather(month)
+    def run(self, curr_datetime: datetime.datetime):
+        self._update(curr_datetime.month)
 
         #
         #
@@ -99,7 +108,6 @@ class Weather(Producer):
         #resp.raise_for_status()
 
         logger.debug(
-            "sent weather data to kafka, temp: %s, status: %s",
-            self.temp,
-            self._status.name,
+            f"sent weather data to kafka, "
+            f"temp: {self._temp}, status: {self._status.name}",
         )

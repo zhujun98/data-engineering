@@ -15,14 +15,14 @@ class Train:
         BROKEN_DOWN = 2
 
     def __init__(self, train_id: str, status: int = 0):
-        self._train_id = train_id
+        self.train_id = train_id
         self._status = self.Status(status)
 
     def set_status(self, status: int):
         self._status = self.Status(status)
 
     def __str__(self):
-        return f"Train ID {self._train_id} is " \
+        return f"Train ID {self.train_id} is " \
                f"{self._status.name.replace('_', ' ')}"
 
     def __repr__(self):

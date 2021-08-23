@@ -13,15 +13,14 @@ logger = logging.getLogger(__name__)
 
 class Station(Producer):
     """Defines a single station"""
+    key_schema = None
+    value_schema = None
+    # key_schema = avro.load(
+    #     f"{Path(__file__).parents[0]}/schemas/arrival_key.json")
+    # value_schema = avro.load(
+    #     f"{Path(__file__).parents[0]}/schemas/arrival_value.json")
 
-    key_schema = avro.load(
-        f"{Path(__file__).parents[0]}/schemas/arrival_key.json")
-    value_schema = avro.load(
-        f"{Path(__file__).parents[0]}/schemas/arrival_value.json")
-
-    def __init__(self, station_id: int, name: str, color: str,
-                 direction_a=None,
-                 direction_b=None):
+    def __init__(self, station_id: int, name: str, color: str):
         self.name = name
         station_name = name.lower().replace(
             "/", "_and_").replace(
@@ -32,16 +31,16 @@ class Station(Producer):
         topic_name = f"{station_name}" # TODO: Come up with a better topic name
         super().__init__(
             topic_name,
-            key_schema=Station.key_schema,
-            value_schema=Station.value_schema,
+            key_schema=self.key_schema,
+            value_schema=self.value_schema,
             num_partitions=1,
             num_replicas=1
         )
 
         self.station_id = int(station_id)
-        self.color = color
-        self.dir_a = direction_a
-        self.dir_b = direction_b
+        self._color = color
+        self.dir_a = None
+        self.dir_b = None
         self.a_train = None
         self.b_train = None
         self.turnstile = Turnstile(self)
