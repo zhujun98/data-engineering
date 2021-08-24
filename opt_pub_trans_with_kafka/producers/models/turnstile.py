@@ -59,8 +59,11 @@ class Turnstile(Producer):
             round(self.metrics_df.iloc[0]["avg_sunday-holiday_rides"])
         )
 
-    def _get_entries(self, curr_datetime, time_step):
+    def _get_entries(self):
         """Returns the number of turnstile entries for the given timeframe."""
+        curr_datetime = datetime.datetime.utcnow()
+        time_step = datetime.timedelta(5)
+
         hour_curve = self.curve_df[self.curve_df["hour"] == curr_datetime.hour]
         ratio = hour_curve.iloc[0]["ridership_ratio"]
         total_steps = int(60 / (60 / time_step.total_seconds()))
@@ -79,10 +82,9 @@ class Turnstile(Producer):
         # Introduce some randomness in the data
         return max(num_entries + random.choice(range(-5, 5)), 0)
 
-    def run(self, curr_datetime: datetime.datetime,
-            time_step: datetime.timedelta):
-        """Simulates riders entering through the turnstile."""
-        num_entries = self._get_entries(curr_datetime, time_step)
+    def run(self):
+        """Override."""
+        num_entries = self._get_entries()
         logger.info("turnstile kafka integration incomplete - skipping")
         #
         #

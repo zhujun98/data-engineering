@@ -45,7 +45,8 @@ class Weather(Producer):
 
         self._initialized = False
 
-    def _update(self, month: int):
+    def _update_status(self):
+        month = datetime.datetime.now().month
         if not self._initialized:
             if month in self.winter_months:
                 self._temp = 40.0
@@ -69,8 +70,9 @@ class Weather(Producer):
 
         self._status = random.choice(list(self.Status))
 
-    def run(self, curr_datetime: datetime.datetime):
-        self._update(curr_datetime.month)
+    def run(self):
+        """Override."""
+        self._update_status()
 
         #
         #

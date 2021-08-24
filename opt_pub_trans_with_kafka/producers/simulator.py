@@ -20,14 +20,13 @@ logger = logging.getLogger(__name__)
 
 class DataSimulator:
 
-    def __init__(self, time_interval: int = 5, time_step: int = 5):
+    def __init__(self, time_interval: int = 5, num_trains: int = 10):
         """Initialization.
 
         :param time_interval: Time interval in seconds between two simulations.
-        :param time_step: Time duration in seconds for each simulation.
+        :param num_trains: Number of trains for each CTA line.
         """
         self._time_interval = time_interval
-        self._time_step = datetime.timedelta(minutes=time_step)
 
         self._raw_df = pd.read_csv(
             f"{Path(__file__).parents[0]}/data/cta_stations.csv"
@@ -35,29 +34,29 @@ class DataSimulator:
 
         # simulated data
         self._cta_lines = [
-            CTALine('blue', self._raw_df),
-            CTALine('red', self._raw_df),
-            CTALine('green', self._raw_df),
+            CTALine('blue', self._raw_df, num_trains=num_trains),
+            CTALine('red', self._raw_df, num_trains=num_trains),
+            CTALine('green', self._raw_df, num_trains=num_trains),
         ]
         # REST proxy
         self._weather_station = Weather()
         # kafka connect
         # configure_connector()
 
-    def run(self):
+    def start(self):
         logger.info("Beginning simulation, press Ctrl+C to exit at any time")
         logger.info("Loading kafka connect jdbc source connector")
 
         logger.info("Beginning CTA train simulation")
         try:
             while True:
-                curr_datetime = datetime.datetime.utcnow()
-                logger.debug(f"Simulation running: {curr_datetime.isoformat()}")
+                logger.debug(f"Simulation running: "
+                             f"{datetime.datetime.utcnow().isoformat()}")
 
-                self._weather_station.run(curr_datetime)
+                self._weather_station.run()
 
                 for line in self._cta_lines:
-                    line.run(curr_datetime, self._time_step)
+                    line.run()
 
                 time.sleep(self._time_interval)
 

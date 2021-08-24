@@ -1,4 +1,5 @@
 """Producer base-class providing common utilites and functionality"""
+import abc
 import configparser
 import logging
 from pathlib import Path
@@ -12,7 +13,7 @@ from confluent_kafka.avro import AvroProducer
 logger = logging.getLogger(__name__)
 
 config = configparser.ConfigParser()
-config.read(Path(__file__).parents[0].joinpath('..', 'config.ini'))
+config.read(Path(__file__).parents[2].joinpath('config.ini'))
 
 BROKER_URL = config['CLUSTER']['BROKER_URL']
 SCHEMA_REGISTRY_URL = config['CLUSTER']['SCHEMA_REGISTRY_URL']
@@ -24,10 +25,8 @@ class Producer:
     # Tracks existing topics across all Producer instances
     existing_topics = set([])
 
-    def __init__(self, topic_name, key_schema,
-                 value_schema=None,
-                 num_partitions=1,
-                 num_replicas=1):
+    def __init__(self, topic_name, key_schema, value_schema,
+                 num_partitions=1, num_replicas=1):
         self._topic_name = topic_name
         self._key_schema = key_schema
         self._value_schema = value_schema
@@ -45,7 +44,7 @@ class Producer:
             self.create_topic()
             Producer.existing_topics.add(self._topic_name)
 
-        self.producer = AvroProducer(
+        self._producer = AvroProducer(
             self.broker_properties, schema_registry=SCHEMA_REGISTRY_URL
         )
 
@@ -64,6 +63,10 @@ class Producer:
         except Exception as e:
             logger.error(f"Failed to create topic: {self._topic_name}")
 
+    @abc.abstractmethod
+    def run(self):
+        pass
+
     def close(self):
         """Prepares the producer for exit by cleaning up the producer"""
         #
@@ -73,6 +76,7 @@ class Producer:
         #
         logger.info("producer close incomplete - skipping")
 
-    def time_millis(self):
-        """Use this function to get the key for Kafka Events"""
+    @staticmethod
+    def time_millis():
+        """Use this function to get the key for Kafka Events."""
         return int(round(time.time() * 1000))

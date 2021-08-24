@@ -6,13 +6,14 @@ from confluent_kafka import avro
 
 from .turnstile import Turnstile
 from .producer import Producer
+from .train import Train
 
 
 logger = logging.getLogger(__name__)
 
 
 class Station(Producer):
-    """Defines a single station."""
+    """Defines a single train station."""
 
     key_schema = avro.load(
         f"{Path(__file__).parents[0]}/schemas/arrival_key.json")
@@ -21,13 +22,13 @@ class Station(Producer):
 
     def __init__(self, station_id: int, name: str, color: str):
         self.name = name
-        station_name = name.lower().replace(
+
+        # <classification>.<name>
+        topic_name = "station." + name.lower().replace(
             "/", "_and_").replace(
             " ", "_").replace(
             "-", "_").replace(
             "'", "")
-
-        topic_name = f"{station_name}" # TODO: Come up with a better topic name
         super().__init__(
             topic_name,
             key_schema=self.key_schema,
@@ -38,56 +39,90 @@ class Station(Producer):
 
         self.station_id = int(station_id)
         self._color = color
-        self.dir_a = None
-        self.dir_b = None
-        self.a_train = None
-        self.b_train = None
-        self.turnstile = Turnstile(self)
+        self._a_train = None  # train ready to move in the a direction
+        self._b_train = None  # train ready to move in the b direction
+        # If given, it is a tuple of
+        # (train, previous station ID, previous direction)
+        self._a_arriving = None
+        self._b_arriving = None
+        self._turnstile = Turnstile(self)
 
-    def run(self, train, direction, prev_station_id, prev_direction):
-        """Simulates train arrivals at this station"""
-        #
-        #
-        # TODO: Complete this function by producing an arrival message to Kafka
-        #
-        #
+        self.a_station = None  # next station in the a direction
+        self.b_station = None  # next station in the b direction
+
+    def run(self):
+        """Override."""
+        self._turnstile.run()
+
         logger.info("arrival kafka integration incomplete - skipping")
-        #self.producer.produce(
-        #    topic=self.topic_name,
-        #    key={"timestamp": self.time_millis()},
-        #    value={
-        #        #
-        #        #
-        #        # TODO: Configure this
-        #        #
-        #        #
-        #    },
-        #)
+
+        if self._a_arriving is not None:
+            if self.a_station is not None:
+                self.set_a_train(*self._a_arriving)
+            else:
+                # The direction of the train flips at the end of the line.
+                self.set_b_train(*self._a_arriving)
+            self._a_arriving = None
+
+        if self._b_arriving is not None:
+            if self.b_station is not None:
+                self.set_b_train(*self._b_arriving)
+            else:
+                # end of line
+                self.set_a_train(*self._b_arriving)
+            self._b_arriving = None
+
+    def set_a_train(self, train, prev_station_id=None, prev_direction=None):
+        """Register a train that will travel to the a direction."""
+        self._a_train = train
+        self._produce_message(train.train_id, "a", train.status,
+                              prev_station_id, prev_direction)
+
+    def set_b_train(self, train, prev_station_id=None, prev_direction=None):
+        """Register a train that will travel to the b direction."""
+        self._b_train = train
+        self._produce_message(train.train_id, "b", train.status,
+                              prev_station_id, prev_direction)
+
+    def _produce_message(self, train_id, direction, status,
+                         prev_station_id, prev_direction):
+        self._producer.produce(
+           topic=self._topic_name,
+           key={"timestamp": self.time_millis()},
+           value={
+               "station_id": self.station_id,
+               "train_id": train_id,
+               "direction": direction,
+               "line": self._color,
+               "train_status": status,
+               "prev_station_id": prev_station_id,
+               "prev_direction": prev_direction
+           },
+        )
+
+    def advance(self):
+        """Move trains to next stations."""
+        if self._a_train is not None:
+            self.a_station._a_arriving = (self._a_train, self.station_id, "a")
+            self._a_train = None
+
+        if self._b_train is not None:
+            self.b_station._b_arriving = (self._b_train, self.station_id, "b")
+            self._b_train = None
+
+    def close(self):
+        """Override."""
+        self._turnstile.close()
+        super().close()
 
     def __str__(self):
-        return "Station | {:^5} | {:<30} | Direction A: | {:^5} | departing to {:<30} | Direction B: | {:^5} | departing to {:<30} | ".format(
-            self.station_id,
-            self.name,
-            self.a_train.train_id if self.a_train is not None else "---",
-            self.dir_a.name if self.dir_a is not None else "---",
-            self.b_train.train_id if self.b_train is not None else "---",
-            self.dir_b.name if self.dir_b is not None else "---",
-        )
+        return f"Station" \
+               f" | {self.station_id:^5}" \
+               f" | {self.name:<30}" \
+               f" | Direction A: | {str(self._a_train) if self._a_train is not None else '---':<30}" \
+               f" | departing to {self.a_station.name if self.a_station is not None else '---':<30}" \
+               f" | Direction B: | {str(self._b_train) if self._b_train is not None else '---':<30}" \
+               f" | departing to {self.b_station.name if self.b_station is not None else '---':<30} | "
 
     def __repr__(self):
         return str(self)
-
-    def arrive_a(self, train, prev_station_id, prev_direction):
-        """Denotes a train arrival at this station in the 'a' direction"""
-        self.a_train = train
-        self.run(train, "a", prev_station_id, prev_direction)
-
-    def arrive_b(self, train, prev_station_id, prev_direction):
-        """Denotes a train arrival at this station in the 'b' direction"""
-        self.b_train = train
-        self.run(train, "b", prev_station_id, prev_direction)
-
-    def close(self):
-        """Prepares the producer for exit by cleaning up the producer"""
-        self.turnstile.close()
-        super().close()
