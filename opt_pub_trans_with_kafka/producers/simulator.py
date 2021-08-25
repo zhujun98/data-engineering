@@ -53,7 +53,7 @@ class DataSimulator:
                 logger.debug(f"Simulation running: "
                              f"{datetime.datetime.utcnow().isoformat()}")
 
-                # self._weather_station.run()
+                self._weather_station.run()
 
                 for line in self._cta_lines:
                     line.run()

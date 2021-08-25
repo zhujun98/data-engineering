@@ -8,6 +8,7 @@ import urllib.parse
 
 import requests
 
+from ..logger import logger
 from .producer import Producer
 
 config = configparser.ConfigParser()
@@ -88,7 +89,6 @@ class Weather(Producer):
         # )
         # resp.raise_for_status()
 
-        # logger.debug(
-        #     f"sent weather data to kafka, "
-        #     f"temp: {self._temp}, status: {self._status.name}",
-        # )
+        logger.info(
+            f"Update weather: temp: {self._temp:.1f}, status: {self._status.name}"
+        )
