@@ -8,7 +8,7 @@ import time
 
 from confluent_kafka import avro
 from confluent_kafka.admin import AdminClient, NewTopic
-from confluent_kafka.avro import AvroProducer
+from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
 logger = logging.getLogger(__name__)
 
@@ -33,20 +33,19 @@ class Producer:
         self._num_partitions = num_partitions
         self._num_replicas = num_replicas
 
-        self.broker_properties = {
-            "bootstrap.servers": BROKER_URL,
-            "client.id": socket.gethostname()
-            # TODO
-        }
-
         # If the topic does not already exist, try to create it
         if self._topic_name not in self.existing_topics:
             self.create_topic()
             Producer.existing_topics.add(self._topic_name)
 
-        self._producer = AvroProducer(
-            self.broker_properties, schema_registry=SCHEMA_REGISTRY_URL
-        )
+        conf = {
+            "bootstrap.servers": BROKER_URL,
+            "client.id": socket.gethostname()
+            # TODO
+        }
+        schema_registry = CachedSchemaRegistryClient(
+            {"url": SCHEMA_REGISTRY_URL})
+        self._producer = AvroProducer(conf, schema_registry=schema_registry)
 
     def create_topic(self):
         """Creates the producer topic."""

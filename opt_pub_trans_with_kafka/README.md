@@ -142,15 +142,15 @@ docker exec broker kafka-topics --zookeeper zookeeper:2181 --list
 
 ### Running the Simulation
 
-There are two pieces to the simulation, the `producer` and `consumer`. 
+Start the producer by:
+```sh
+python run_producer.py
+```
+Test the producer alone with
+```sh
+python simple_consumer.py
+```
 
-#### To run the `producer`:
-
-1. `cd producers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `python simulation.py`
 
 Once the simulation is running, you may hit `Ctrl+C` at any time to exit.
 

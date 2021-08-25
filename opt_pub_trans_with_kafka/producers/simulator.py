@@ -1,6 +1,7 @@
 """
 Defines a time simulation responsible for executing any registered producers.
 """
+import configparser
 import datetime
 import time
 import logging
@@ -12,6 +13,9 @@ import pandas as pd
 from .connector import configure_connector
 from .models import CTALine, Weather
 
+config = configparser.ConfigParser()
+config.read(Path(__file__).parents[1].joinpath("config.ini"))
+
 # Import logging before models to ensure configuration is picked up
 fileConfig(f"{Path(__file__).parents[0]}/logging.ini")
 
@@ -20,19 +24,20 @@ logger = logging.getLogger(__name__)
 
 class DataSimulator:
 
-    def __init__(self, time_interval: int = 5, num_trains: int = 10):
+    def __init__(self, num_trains: int = None):
         """Initialization.
 
-        :param time_interval: Time interval in seconds between two simulations.
         :param num_trains: Number of trains for each CTA line.
         """
-        self._time_interval = time_interval
+        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
 
         self._raw_df = pd.read_csv(
             f"{Path(__file__).parents[0]}/data/cta_stations.csv"
         ).sort_values("order")
 
         # simulated data
+        if num_trains is None:
+            num_trains = int(config["SIMULATOR"]["NUM_TRAINS"])
         self._cta_lines = [
             CTALine('blue', self._raw_df, num_trains=num_trains),
             CTALine('red', self._raw_df, num_trains=num_trains),

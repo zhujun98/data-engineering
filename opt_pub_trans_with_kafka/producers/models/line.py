@@ -1,5 +1,4 @@
 """Defines functionality relating to train lines"""
-import datetime
 import logging
 
 from pandas import DataFrame
@@ -16,7 +15,7 @@ class CTALine(Producer):
 
     _colors = frozenset(['red', 'blue', 'green'])
 
-    def __init__(self, color: str, station_df: DataFrame, num_trains: int = 10):
+    def __init__(self, color: str, station_df: DataFrame, num_trains: int):
         self._color = color.lower()
         if self._color not in self._colors:
             raise ValueError(f"CTALine color must be one of: {self._colors}")

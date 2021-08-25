@@ -75,29 +75,30 @@ class Station(Producer):
     def set_a_train(self, train, prev_station_id=None, prev_direction=None):
         """Register a train that will travel to the a direction."""
         self._a_train = train
-        self._produce_message(train.train_id, "a", train.status,
+        self._produce_message(train.train_id, "a", train.status.name,
                               prev_station_id, prev_direction)
 
     def set_b_train(self, train, prev_station_id=None, prev_direction=None):
         """Register a train that will travel to the b direction."""
         self._b_train = train
-        self._produce_message(train.train_id, "b", train.status,
+        self._produce_message(train.train_id, "b", train.status.name,
                               prev_station_id, prev_direction)
 
     def _produce_message(self, train_id, direction, status,
                          prev_station_id, prev_direction):
         self._producer.produce(
-           topic=self._topic_name,
-           key={"timestamp": self.time_millis()},
-           value={
-               "station_id": self.station_id,
-               "train_id": train_id,
-               "direction": direction,
-               "line": self._color,
-               "train_status": status,
-               "prev_station_id": prev_station_id,
-               "prev_direction": prev_direction
-           },
+            topic=self._topic_name,
+            key={"timestamp": self.time_millis()},
+            key_schema=self._key_schema,
+            value={
+                "station_id": self.station_id,
+                "train_id": train_id,
+                "direction": direction,
+                "line": self._color,
+                "train_status": status,
+                "prev_station_id": prev_station_id,
+                "prev_direction": prev_direction},
+            value_schema=self._value_schema
         )
 
     def advance(self):
