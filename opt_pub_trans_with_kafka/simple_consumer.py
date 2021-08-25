@@ -11,7 +11,7 @@ def consume(broker_url, schema_registry_url):
     }
 
     consumer = AvroConsumer(conf, schema_registry=schema_registry)
-    consumer.subscribe(["^station.*"])
+    consumer.subscribe(["^station.*", "^turnstile.*"])
 
     while True:
         msg = consumer.poll(1.0)

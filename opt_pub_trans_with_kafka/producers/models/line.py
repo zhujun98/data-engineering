@@ -1,13 +1,8 @@
-"""Defines functionality relating to train lines"""
-import logging
-
 from pandas import DataFrame
 
 from .producer import Producer
 from .station import Station
 from .train import Train
-
-logger = logging.getLogger(__name__)
 
 
 class CTALine(Producer):
@@ -40,11 +35,9 @@ class CTALine(Producer):
         prev_station = None
         for name in station_names:
             station_data = station_df[station_df["station_name"] == name]
-            curr_station = Station(
-                station_data["station_id"].unique()[0],
-                name,
-                self._color
-            )
+            # int64 -> int
+            station_id = int(station_data["station_id"].unique()[0])
+            curr_station = Station(station_id, name, self._color)
             curr_station.a_station = prev_station
             if prev_station is not None:
                 prev_station.b_station = curr_station

@@ -4,22 +4,18 @@ Defines a time simulation responsible for executing any registered producers.
 import configparser
 import datetime
 import time
-import logging
-from logging.config import fileConfig
 from pathlib import Path
 
 import pandas as pd
 
 from .connector import configure_connector
+from .logger import logger
 from .models import CTALine, Weather
 
 config = configparser.ConfigParser()
 config.read(Path(__file__).parents[1].joinpath("config.ini"))
-
-# Import logging before models to ensure configuration is picked up
-fileConfig(f"{Path(__file__).parents[0]}/logging.ini")
-
-logger = logging.getLogger(__name__)
+TIME_INTERVAL = int(config['SIMULATOR']['TIME_INTERVAL'])
+NUM_TRAINS = int(config["SIMULATOR"]["NUM_TRAINS"])
 
 
 class DataSimulator:
@@ -29,7 +25,7 @@ class DataSimulator:
 
         :param num_trains: Number of trains for each CTA line.
         """
-        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
+        self._time_interval = TIME_INTERVAL
 
         self._raw_df = pd.read_csv(
             f"{Path(__file__).parents[0]}/data/cta_stations.csv"
@@ -37,14 +33,13 @@ class DataSimulator:
 
         # simulated data
         if num_trains is None:
-            num_trains = int(config["SIMULATOR"]["NUM_TRAINS"])
-        self._cta_lines = [
-            CTALine('blue', self._raw_df, num_trains=num_trains),
-            CTALine('red', self._raw_df, num_trains=num_trains),
-            CTALine('green', self._raw_df, num_trains=num_trains),
-        ]
+            num_trains = NUM_TRAINS
+        self._cta_lines = [CTALine(c, self._raw_df, num_trains=num_trains)
+                           for c in ('blue', 'red', 'green')]
+
         # REST proxy
         self._weather_station = Weather()
+
         # kafka connect
         # configure_connector()
 
@@ -58,7 +53,7 @@ class DataSimulator:
                 logger.debug(f"Simulation running: "
                              f"{datetime.datetime.utcnow().isoformat()}")
 
-                self._weather_station.run()
+                # self._weather_station.run()
 
                 for line in self._cta_lines:
                     line.run()

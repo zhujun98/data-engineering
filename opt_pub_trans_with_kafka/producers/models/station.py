@@ -1,15 +1,11 @@
-"""Methods pertaining to loading and configuring CTA "L" station data."""
-import logging
 from pathlib import Path
 
 from confluent_kafka import avro
 
+from ..logger import logger
 from .turnstile import Turnstile
 from .producer import Producer
-from .train import Train
-
-
-logger = logging.getLogger(__name__)
+from .utils import normalize_station_name
 
 
 class Station(Producer):
@@ -20,15 +16,11 @@ class Station(Producer):
     value_schema = avro.load(
         f"{Path(__file__).parents[0]}/schemas/arrival_value.json")
 
-    def __init__(self, station_id: int, name: str, color: str):
-        self.name = name
+    def __init__(self, station_id: int, station_name: str, color: str):
+        self._name = station_name
 
-        # <classification>.<name>
-        topic_name = "station." + name.lower().replace(
-            "/", "_and_").replace(
-            " ", "_").replace(
-            "-", "_").replace(
-            "'", "")
+        # <classification>.<station name>
+        topic_name = "station." + normalize_station_name(station_name)
         super().__init__(
             topic_name,
             key_schema=self.key_schema,
@@ -37,7 +29,7 @@ class Station(Producer):
             num_replicas=1
         )
 
-        self.station_id = int(station_id)
+        self._id = station_id
         self._color = color
         self._a_train = None  # train ready to move in the a direction
         self._b_train = None  # train ready to move in the b direction
@@ -45,7 +37,7 @@ class Station(Producer):
         # (train, previous station ID, previous direction)
         self._a_arriving = None
         self._b_arriving = None
-        self._turnstile = Turnstile(self)
+        self._turnstile = Turnstile(station_id, station_name, color)
 
         self.a_station = None  # next station in the a direction
         self.b_station = None  # next station in the b direction
@@ -53,8 +45,6 @@ class Station(Producer):
     def run(self):
         """Override."""
         self._turnstile.run()
-
-        logger.info("arrival kafka integration incomplete - skipping")
 
         if self._a_arriving is not None:
             if self.a_station is not None:
@@ -77,12 +67,14 @@ class Station(Producer):
         self._a_train = train
         self._produce_message(train.train_id, "a", train.status.name,
                               prev_station_id, prev_direction)
+        logger.info(f"{self._name} -> {self.a_station._name}: {train.train_id}")
 
     def set_b_train(self, train, prev_station_id=None, prev_direction=None):
         """Register a train that will travel to the b direction."""
         self._b_train = train
         self._produce_message(train.train_id, "b", train.status.name,
                               prev_station_id, prev_direction)
+        logger.info(f"{self._name} -> {self.b_station._name}: {train.train_id}")
 
     def _produce_message(self, train_id, direction, status,
                          prev_station_id, prev_direction):
@@ -91,24 +83,25 @@ class Station(Producer):
             key={"timestamp": self.time_millis()},
             key_schema=self._key_schema,
             value={
-                "station_id": self.station_id,
+                "station_id": self._id,
                 "train_id": train_id,
                 "direction": direction,
                 "line": self._color,
                 "train_status": status,
                 "prev_station_id": prev_station_id,
-                "prev_direction": prev_direction},
+                "prev_direction": prev_direction
+            },
             value_schema=self._value_schema
         )
 
     def advance(self):
         """Move trains to next stations."""
         if self._a_train is not None:
-            self.a_station._a_arriving = (self._a_train, self.station_id, "a")
+            self.a_station._a_arriving = (self._a_train, self._id, "a")
             self._a_train = None
 
         if self._b_train is not None:
-            self.b_station._b_arriving = (self._b_train, self.station_id, "b")
+            self.b_station._b_arriving = (self._b_train, self._id, "b")
             self._b_train = None
 
     def close(self):
@@ -118,12 +111,12 @@ class Station(Producer):
 
     def __str__(self):
         return f"Station" \
-               f" | {self.station_id:^5}" \
-               f" | {self.name:<30}" \
+               f" | {self._id:^5}" \
+               f" | {self._name:<30}" \
                f" | Direction A: | {str(self._a_train) if self._a_train is not None else '---':<30}" \
-               f" | departing to {self.a_station.name if self.a_station is not None else '---':<30}" \
+               f" | departing to {self.a_station._name if self.a_station is not None else '---':<30}" \
                f" | Direction B: | {str(self._b_train) if self._b_train is not None else '---':<30}" \
-               f" | departing to {self.b_station.name if self.b_station is not None else '---':<30} | "
+               f" | departing to {self.b_station._name if self.b_station is not None else '---':<30} | "
 
     def __repr__(self):
         return str(self)

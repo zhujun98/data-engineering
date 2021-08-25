@@ -1,9 +1,4 @@
-"""Defines CTA Train Model"""
 from enum import IntEnum
-import logging
-
-
-logger = logging.getLogger(__name__)
 
 
 class Train:

@@ -1,7 +1,5 @@
-"""Producer base-class providing common utilites and functionality"""
 import abc
 import configparser
-import logging
 from pathlib import Path
 import socket
 import time
@@ -10,11 +8,10 @@ from confluent_kafka import avro
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
-logger = logging.getLogger(__name__)
+from ..logger import logger
 
 config = configparser.ConfigParser()
 config.read(Path(__file__).parents[2].joinpath('config.ini'))
-
 BROKER_URL = config['CLUSTER']['BROKER_URL']
 SCHEMA_REGISTRY_URL = config['CLUSTER']['SCHEMA_REGISTRY_URL']
 
@@ -73,7 +70,7 @@ class Producer:
         # TODO: Write cleanup code for the Producer here
         #
         #
-        logger.info("producer close incomplete - skipping")
+        pass
 
     @staticmethod
     def time_millis():
