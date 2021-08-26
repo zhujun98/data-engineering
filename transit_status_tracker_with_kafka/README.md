@@ -1,4 +1,4 @@
-# Public Transit Status with Apache Kafka
+# Transit Status Tracker with Apache Kafka
 
 The Chicago Transit Authority (CTA) has asked us to develop a dashboard 
 displaying system status for its commuters. We have decided to use Kafka 

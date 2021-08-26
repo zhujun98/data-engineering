@@ -31,7 +31,8 @@ Jun Zhu
 
   ![](./dend_capstone_project/architecture.jpg)
 
+
 ## Udacity Data Streaming Nanodegree
 
-- [Optimize Public Transportation with Kafka](opt_pub_trans_with_kafka)
+- [Transit Status Tracker with Kafka](./transit_status_tracker_with_kafka)
 - [Evaluate Human Balance with Spark Streaming](./eval_human_balance_with_spark_streaming)
