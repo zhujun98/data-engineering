@@ -30,7 +30,7 @@ class Producer:
         # If the topic does not already exist, try to create it
         if self._topic_name not in self.existing_topics:
             self.create_topic()
-            Producer.existing_topics.add(self._topic_name)
+            self.existing_topics.add(self._topic_name)
 
         conf = {
             "bootstrap.servers": BROKER_URL,

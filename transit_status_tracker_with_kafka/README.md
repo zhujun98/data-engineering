@@ -98,24 +98,18 @@ docker exec broker kafka-topics --zookeeper zookeeper:2181 --list
 
 ### Running the Simulation
 
-Start the producer by:
+Start all the producers by:
 ```sh
-python run_producer.py
+python start_producers.py
 ```
 Test the producer alone with
 ```sh
 python simple_consumer.py
 ```
-
-
-Once the simulation is running, you may hit `Ctrl+C` at any time to exit.
-
-#### To run the Faust Stream Processing Application:
-1. `cd consumers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `faust -A faust_stream worker -l info`
+Start the Faust stream processing application.
+```sh
+faust -A faust_stream worker -l info
+```
 
 
 #### To run the KSQL Creation Script:

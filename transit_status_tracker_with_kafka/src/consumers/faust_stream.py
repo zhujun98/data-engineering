@@ -1,10 +1,9 @@
-"""Defines trends calculations for stations"""
-import logging
-
 import faust
 
+from ..config import config
+from .logger import logger
 
-logger = logging.getLogger(__name__)
+BROKER_URL = config['CLUSTER']['BROKER_URL']
 
 
 # Faust will ingest records from Kafka in this format
@@ -29,21 +28,18 @@ class TransformedStation(faust.Record):
     line: str
 
 
-# TODO: Define a Faust Stream that ingests data from the Kafka Connect stations topic and
-#   places it into a new topic with only the necessary information.
-app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memory://")
-# TODO: Define the input Kafka Topic. Hint: What topic did Kafka Connect output to?
-# topic = app.topic("TODO", value_type=Station)
-# TODO: Define the output Kafka Topic
-# out_topic = app.topic("TODO", partitions=1)
-# TODO: Define a Faust Table
-#table = app.Table(
-#    # "TODO",
-#    # default=TODO,
-#    partitions=1,
-#    changelog_topic=out_topic,
-#)
+app = faust.App("stations-stream", broker=BROKER_URL, store="memory://")
 
+topic = app.topic("TODO", value_type=Station)
+
+output_topic = app.topic("TODO", partitions=1)
+
+table = app.Table(
+   # "TODO",
+   # default=TODO,
+   partitions=1,
+   changelog_topic=output_topic
+)
 
 #
 #

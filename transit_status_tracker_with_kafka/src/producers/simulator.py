@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from ..config import config
-from .connector import configure_connector
+from .connector import create_jdbc_connector
 from .logger import logger
 from .models import CTALine, Weather
 
@@ -27,17 +27,17 @@ class DataSimulator:
             f"{Path(__file__).parents[0]}/data/cta_stations.csv"
         ).sort_values("order")
 
-        # simulated data
+        # simulated train and turnstile data via AvroProducer
         if num_trains is None:
             num_trains = NUM_TRAINS
         self._cta_lines = [CTALine(c, self._raw_df, num_trains=num_trains)
                            for c in ('blue', 'red', 'green')]
 
-        # REST proxy
+        # simulated weather data via REST proxy
         self._weather_station = Weather()
 
-        # kafka connect
-        # configure_connector()
+        # kafka JDBC connector
+        create_jdbc_connector()
 
     def start(self):
         logger.info("Beginning simulation, press Ctrl+C to exit at any time")
@@ -49,10 +49,10 @@ class DataSimulator:
                 logger.debug(f"Simulation running: "
                              f"{datetime.datetime.utcnow().isoformat()}")
 
-                self._weather_station.run()
-
-                for line in self._cta_lines:
-                    line.run()
+                # self._weather_station.run()
+                #
+                # for line in self._cta_lines:
+                #     line.run()
 
                 time.sleep(self._time_interval)
 
