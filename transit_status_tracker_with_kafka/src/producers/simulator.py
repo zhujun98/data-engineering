@@ -1,19 +1,15 @@
-"""
-Defines a time simulation responsible for executing any registered producers.
-"""
-import configparser
 import datetime
 import time
 from pathlib import Path
 
 import pandas as pd
 
+from ..config import config
 from .connector import configure_connector
 from .logger import logger
 from .models import CTALine, Weather
 
-config = configparser.ConfigParser()
-config.read(Path(__file__).parents[1].joinpath("config.ini"))
+
 TIME_INTERVAL = int(config['SIMULATOR']['TIME_INTERVAL'])
 NUM_TRAINS = int(config["SIMULATOR"]["NUM_TRAINS"])
 

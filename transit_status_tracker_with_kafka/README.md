@@ -8,50 +8,6 @@ Our architecture will look like so:
 
 ![Project Architecture](images/archetecture.png)
 
-### Step 1: Create Kafka Producers
-The first step in our plan is to configure the train stations to emit some of 
-the events that we need. The CTA has placed a sensor on each side of every 
-train station that can be programmed to take an action whenever a train arrives 
-at the station.
-
-To accomplish this, you must complete the following tasks:
-
-1. Complete the code in `producers/models/producer.py`
-1. Define a `value` schema for the arrival event in `producers/models/schemas/arrival_value.json` with the following attributes
-	* `station_id`
-	* `train_id`
-	* `direction`
-	* `line`
-	* `train_status`
-	* `prev_station_id`
-	* `prev_direction`
-1. Complete the code in `producers/models/station.py` so that:
-	* A topic is created for each station in Kafka to track the arrival events
-	* The station emits an `arrival` event to Kafka whenever the `Station.run()` function is called.
-	* Ensure that events emitted to kafka are paired with the Avro `key` and `value` schemas
-1. Define a `value` schema for the turnstile event in `producers/models/schemas/turnstile_value.json` with the following attributes
-	* `station_id`
-	* `station_name`
-	* `line`
-1. Complete the code in `producers/models/turnstile.py` so that:
-	* A topic is created for each turnstile for each station in Kafka to track the turnstile events
-	* The station emits a `turnstile` event to Kafka whenever the `Turnstile.run()` function is called.
-	* Ensure that events emitted to kafka are paired with the Avro `key` and `value` schemas
-
-### Step 2: Configure Kafka REST Proxy Producer
-Our partners at the CTA have asked that we also send weather readings into Kafka from their weather hardware. Unfortunately, this hardware is old and we cannot use the Python Client Library due to hardware restrictions. Instead, we are going to use HTTP REST to send the data to Kafka from the hardware using Kafka's REST Proxy.
-
-To accomplish this, you must complete the following tasks:
-
-1. Define a `value` schema for the weather event in `producers/models/schemas/weather_value.json` with the following attributes
-	* `temperature`
-	* `status`
-1. Complete the code in `producers/models/weather.py` so that:
-	* A topic is created for weather events
-	* The weather model emits `weather` event to Kafka REST Proxy whenever the `Weather.run()` function is called.
-		* **NOTE**: When sending HTTP requests to Kafka REST Proxy, be careful to include the correct `Content-Type`. Pay close attention to the [examples in the documentation](https://docs.confluent.io/current/kafka-rest/api.html#post--topics-(string-topic_name)) for more information.
-	* Ensure that events emitted to REST Proxy are paired with the Avro `key` and `value` schemas
-
 ### Step 3: Configure Kafka Connect
 Finally, we need to extract station information from our PostgreSQL database into Kafka. We've decided to use the [Kafka JDBC Source Connector](https://docs.confluent.io/current/connect/kafka-connect-jdbc/source-connector/index.html).
 

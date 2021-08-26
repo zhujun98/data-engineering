@@ -1,4 +1,3 @@
-import configparser
 import datetime
 from pathlib import Path
 import math
@@ -7,12 +6,11 @@ import random
 import pandas as pd
 from confluent_kafka import avro
 
+from ...config import config
 from ..logger import logger
 from .producer import Producer
 from .utils import normalize_station_name
 
-config = configparser.ConfigParser()
-config.read(Path(__file__).parents[2].joinpath("config.ini"))
 TIME_INTERVAL = int(config['SIMULATOR']['TIME_INTERVAL'])
 
 

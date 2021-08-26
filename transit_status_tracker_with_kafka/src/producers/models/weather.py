@@ -1,4 +1,3 @@
-import configparser
 from enum import IntEnum
 import json
 from pathlib import Path
@@ -7,11 +6,10 @@ import random
 
 import requests
 
+from ...config import config
 from ..logger import logger
 from .producer import Producer
 
-config = configparser.ConfigParser()
-config.read(Path(__file__).parents[2].joinpath('config.ini'))
 REST_PROXY_URL = config["CLUSTER"]["REST_PROXY_URL"]
 
 

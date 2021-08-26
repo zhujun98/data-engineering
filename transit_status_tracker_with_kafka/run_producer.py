@@ -1,4 +1,4 @@
-from producers.simulator import DataSimulator
+from src.producers.simulator import DataSimulator
 
 
 if __name__ == "__main__":
