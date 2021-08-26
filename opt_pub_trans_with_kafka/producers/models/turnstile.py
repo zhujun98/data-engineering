@@ -7,8 +7,8 @@ import random
 import pandas as pd
 from confluent_kafka import avro
 
-from .producer import Producer
 from ..logger import logger
+from .producer import Producer
 from .utils import normalize_station_name
 
 config = configparser.ConfigParser()

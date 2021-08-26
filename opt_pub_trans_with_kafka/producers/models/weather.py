@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 import datetime
 import random
-import urllib.parse
 
 import requests
 
@@ -27,9 +26,10 @@ class Weather(Producer):
         PRECIPITATION = 4
 
     with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as fp:
-        key_schema = json.load(fp)
+        # Load schema from file and convert it to a str.
+        key_schema = json.dumps(json.load(fp))
     with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as fp:
-        value_schema = json.load(fp)
+        value_schema = json.dumps(json.load(fp))
 
     winter_months = {0, 1, 2, 3, 10, 11}
     summer_months = {6, 7, 8}
@@ -74,21 +74,30 @@ class Weather(Producer):
         """Override."""
         self._update_status()
 
-        # resp = requests.post(
-        #    f"{REST_PROXY_URL}/TODO",
-        #    headers={"Content-Type": "TODO"},
-        #    data=json.dumps(
-        #        {
-        #            #
-        #            #
-        #            # TODO: Provide key schema, value schema, and records
-        #            #
-        #            #
-        #        }
-        #    ),
-        # )
-        # resp.raise_for_status()
+        r = requests.post(
+           f"{REST_PROXY_URL}/topics/{self._topic_name}",
+           headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
+           data=json.dumps({
+               "key_schema": self.key_schema,
+               "value_schema": self.value_schema,
+               "records": [{
+                    "key": {
+                        "timestamp": self.time_millis()
+                    },
+                    "value": {
+                        "temperature": self._temp,
+                        "status": self._status.name
+                    },
+                }]
+            })
+        )
+        try:
+            r.raise_for_status()
+        except Exception as e:
+            logger.error("Failed when publish weather data: ", repr(e))
 
         logger.info(
-            f"Update weather: temp: {self._temp:.1f}, status: {self._status.name}"
+            f"Update weather - "
+            f"temp: {self._temp:.1f}, "
+            f"status: {self._status.name}"
         )
