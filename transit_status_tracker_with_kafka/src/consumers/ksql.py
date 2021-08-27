@@ -4,13 +4,11 @@ import logging
 
 import requests
 
-import topic_check
-
+from ..config import config
+from ..utils import topic_exists
 
 logger = logging.getLogger(__name__)
 
-
-KSQL_URL = "http://localhost:8088"
 
 #
 # TODO: Complete the following KSQL statements.
@@ -36,13 +34,13 @@ WITH (???) AS
 
 def execute_statement():
     """Executes the KSQL statement against the KSQL API"""
-    if topic_check.topic_exists("TURNSTILE_SUMMARY") is True:
+    if topic_exists("TURNSTILE_SUMMARY") is True:
         return
 
     logging.debug("executing ksql statement...")
 
     resp = requests.post(
-        f"{KSQL_URL}/ksql",
+        f"{config['KSQL']['URL']}/ksql",
         headers={"Content-Type": "application/vnd.ksql.v1+json"},
         data=json.dumps(
             {

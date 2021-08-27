@@ -18,8 +18,8 @@ class Producer:
 
     def __init__(self, topic_name, key_schema, value_schema,
                  num_partitions=1, num_replicas=1):
-        self._broker_url = config['CLUSTER']['BROKER_URL']
-        self._schema_registry_url = config['CLUSTER']['SCHEMA_REGISTRY_URL']
+        self._broker_url = config['KAFKA']['BROKER_URL']
+        self._schema_registry_url = config['KAFKA']['SCHEMA_REGISTRY_URL']
         self._topic_name = topic_name
         self._key_schema = key_schema
         self._value_schema = value_schema

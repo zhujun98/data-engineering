@@ -1,13 +1,10 @@
 import faust
 
 from ..config import config
-from .logger import logger
-
-BROKER_URL = config['CLUSTER']['BROKER_URL']
 
 
 # Faust will ingest records from Kafka in this format
-class Station(faust.Record):
+class Station(faust.Record, validation=True, serializer="json"):
     stop_id: int
     direction_id: str
     stop_name: str
@@ -21,34 +18,44 @@ class Station(faust.Record):
 
 
 # Faust will produce records to Kafka in this format
-class TransformedStation(faust.Record):
+class TransformedStation(faust.Record, validation=True, serializer="json"):
     station_id: int
     station_name: str
     order: int
     line: str
 
 
-app = faust.App("stations-stream", broker=BROKER_URL, store="memory://")
+app = faust.App("stations-stream", broker=config['KAFKA']['BROKER_ENDPOINT'])
 
-topic = app.topic("TODO", value_type=Station)
+connector_name = config['KAFKA']['CONNECTOR_NAME']
+topic_prefix = config['KAFKA']['CONNECTOR_TOPIC_PREFIX']
 
-output_topic = app.topic("TODO", partitions=1)
+in_topic = app.topic(f"{topic_prefix}{connector_name}",
+                     value_type=Station)
+
+out_topic_name = f"{topic_prefix}.{connector_name}.table"
+out_topic = app.topic(out_topic_name, partitions=1)
 
 table = app.Table(
-   # "TODO",
-   # default=TODO,
+   out_topic_name,
+   default=TransformedStation,
    partitions=1,
-   changelog_topic=output_topic
+   changelog_topic=out_topic
 )
 
-#
-#
-# TODO: Using Faust, transform input `Station` records into `TransformedStation` records. Note that
-# "line" is the color of the station. So if the `Station` record has the field `red` set to true,
-# then you would set the `line` of the `TransformedStation` record to the string `"red"`
-#
-#
 
+@app.agent(in_topic)
+async def process(stream):
+    async for v in stream:
+        if v.red:
+            line = 'red'
+        elif v.blue:
+            line = 'blue'
+        elif v.green:
+            line = 'green'
+        else:
+            raise RuntimeError
 
-if __name__ == "__main__":
-    app.main()
+        table[v.station_id] = TransformedStation(
+            v.station_id, v.station_name, v.order, line
+        )

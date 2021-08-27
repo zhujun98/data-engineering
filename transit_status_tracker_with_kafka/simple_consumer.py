@@ -11,7 +11,10 @@ def consume(broker_url, schema_registry_url):
     }
 
     consumer = AvroConsumer(conf, schema_registry=schema_registry)
-    consumer.subscribe(["^station.*", "^turnstile.*", "weather.weather"])
+    consumer.subscribe(["^station.*",
+                        "^turnstile.*",
+                        "weather.weather",
+                        "cta.stations"])
 
     while True:
         msg = consumer.poll(1.0)
@@ -24,7 +27,7 @@ def consume(broker_url, schema_registry_url):
 if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read("config.ini")
-    BROKER_URL = config['CLUSTER']['BROKER_URL']
-    SCHEMA_REGISTRY_URL = config['CLUSTER']['SCHEMA_REGISTRY_URL']
+    BROKER_URL = config['KAFKA']['BROKER_URL']
+    SCHEMA_REGISTRY_URL = config['KAFKA']['SCHEMA_REGISTRY_URL']
 
     consume(BROKER_URL, SCHEMA_REGISTRY_URL)

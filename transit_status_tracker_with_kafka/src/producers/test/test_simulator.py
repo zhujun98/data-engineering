@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 
 from ..models.producer import AvroProducer
-from ..simulator import DataSimulator
+from ..simulation import DataSimulator
 
 
 @patch.object(AvroProducer, "produce")

@@ -6,18 +6,24 @@ from ..config import config
 from .logger import logger
 
 
-class Connector:
-    """Kafka connector."""
+class PostgresConnector:
+    """Kafka Postgres connector."""
     def __init__(self):
-        self._connect_url = config["CONNECTOR"]["KAFKA_CONNECT_URL"]
-        self._name = config["CONNECTOR"]["CONNECTOR_NAME"]
+        self._url = config["KAFKA"]["CONNECT_URL"] + "/connectors"
+        self._name = config["KAFKA"]["CONNECTOR_NAME"]
+        self._topic_prefix = config["KAFKA"]["CONNECTOR_TOPIC_PREFIX"]
+
+        self._dbname = config['POSTGRES']['DBNAME']
+        self._username = config['POSTGRES']['USERNAME']
+        self._password = config['POSTGRES']['PASSWORD']
+        self._endpoint = config['POSTGRES']['ENDPOINT']
 
     def start(self):
         """Start a kafka JDBC connector.
 
         Delete the old connector if it already exists.
         """
-        connector = f"{self._connect_url}/{self._name}"
+        connector = f"{self._url}/{self._name}"
         r = requests.get(connector)
         if r.status_code == 200:
             r = requests.delete(connector)
@@ -25,13 +31,13 @@ class Connector:
                 r.raise_for_status()
             except Exception as e:
                 logger.error("Unexpected error: ", repr(e))
-            logger.info("Deleted existing connector!")
+            logger.info(f"Deleted existing connector: {self._name}")
 
         # Caveat: The Docker URL of PostgresDB should be used for
         #         "connection.url" when running with docker-compose in your
         #         local machine.
         r = requests.post(
-           self._connect_url,
+           self._url,
            headers={"Content-Type": "application/json"},
            data=json.dumps({
                "name": self._name,
@@ -42,13 +48,13 @@ class Connector:
                    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
                    "value.converter.schemas.enable": "false",
                    "batch.max.rows": "500",
-                   "connection.url": "jdbc:postgresql://postgres:5432/cta",
-                   "connection.user": "cta_admin",
-                   "connection.password": "chicago",
+                   "connection.url": f"jdbc:postgresql://{self._endpoint}/{self._dbname}",
+                   "connection.user": self._username,
+                   "connection.password": self._password,
                    "table.whitelist": "stations",
                    "mode": "incrementing",
                    "incrementing.column.name": "stop_id",
-                   "topic.prefix": "connect.",
+                   "topic.prefix": self._topic_prefix,
                    "poll.interval.ms": "10000",
                }
            }),
@@ -57,7 +63,8 @@ class Connector:
         try:
             r.raise_for_status()
         except Exception as e:
-            logger.critical("Failed when creating the kafka connector: ", repr(e))
+            logger.critical(
+                "Failed when creating the kafka connector: ", repr(e))
             exit(1)
 
-        logger.info("Connector created successfully")
+        logger.info(f"Connector created successfully: {self._name}")

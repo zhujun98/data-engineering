@@ -108,15 +108,15 @@ python start_producers.py
 
 Start the Faust stream processing application.
 ```sh
-faust -A faust_stream worker -l info
+python start_faust_app.py worker
 ```
 
-#### To run the KSQL Creation Script:
+Run the KSQL Creation Script:
 ```sh
 python ksql.py
 ```
 
-#### To run the `consumer`:
+Start consumers:
 ```sh
 python server.py
 ```

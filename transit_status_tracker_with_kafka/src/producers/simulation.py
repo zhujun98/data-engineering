@@ -5,12 +5,12 @@ from pathlib import Path
 import pandas as pd
 
 from ..config import config
-from .connector import Connector
+from .connector import PostgresConnector
 from .logger import logger
 from .models import CTALine, Weather
 
 
-class DataSimulator:
+class StreamSimulation:
 
     def __init__(self, num_trains: int = None):
         """Initialization.
@@ -33,7 +33,7 @@ class DataSimulator:
         self._weather_station = Weather()
 
         # kafka JDBC connector
-        self._connector = Connector()
+        self._connector = PostgresConnector()
 
     def start(self):
         logger.info("Beginning simulation, press Ctrl+C to exit at any time")

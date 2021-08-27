@@ -14,15 +14,13 @@ logger = logging.getLogger(__name__)
 class KafkaConsumer:
     """Defines the base kafka consumer class"""
 
-    def __init__(
-        self,
-        topic_name_pattern,
-        message_handler,
-        is_avro=True,
-        offset_earliest=False,
-        sleep_secs=1.0,
-        consume_timeout=0.1,
-    ):
+    def __init__(self,
+                 topic_name_pattern,
+                 message_handler,
+                 is_avro=True,
+                 offset_earliest=False,
+                 sleep_secs=1.0,
+                 consume_timeout=0.1):
         """Creates a consumer object for asynchronous use"""
         self.topic_name_pattern = topic_name_pattern
         self.message_handler = message_handler
@@ -45,10 +43,9 @@ class KafkaConsumer:
         # TODO: Create the Consumer, using the appropriate type.
         if is_avro is True:
             self.broker_properties["schema.registry.url"] = "http://localhost:8081"
-            #self.consumer = AvroConsumer(...)
+            self.consumer = AvroConsumer(...)
         else:
-            #self.consumer = Consumer(...)
-            pass
+            self.consumer = Consumer(...)
 
         #
         #
@@ -93,7 +90,6 @@ class KafkaConsumer:
         #
         logger.info("_consume is incomplete - skipping")
         return 0
-
 
     def close(self):
         """Cleans up any open kafka consumers"""

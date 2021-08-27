@@ -2,10 +2,10 @@ from pathlib import Path
 
 from confluent_kafka import avro
 
+from ...utils import normalize_station_name
 from ..logger import logger
 from .turnstile import Turnstile
 from .producer import Producer
-from .utils import normalize_station_name
 
 
 class Station(Producer):

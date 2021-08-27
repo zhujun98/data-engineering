@@ -73,7 +73,7 @@ Use a Faust app as consumer:
 # terminal 1
 python python/producer_consumer.py --produce 1000 --sync
 # terminal 2
-python python/faust_app.py
+python python/faust_app.py worker
 ```
 
 ## Java API

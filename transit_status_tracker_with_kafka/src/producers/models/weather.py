@@ -70,7 +70,7 @@ class Weather(Producer):
         """Override."""
         self._update_status()
 
-        rest_proxy_url = config['CLUSTER']['REST_PROXY_URL']
+        rest_proxy_url = config['KAFKA']['REST_PROXY_URL']
         r = requests.post(
            f"{rest_proxy_url}/topics/{self._topic_name}",
            headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
