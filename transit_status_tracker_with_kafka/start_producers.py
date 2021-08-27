@@ -1,6 +1,6 @@
-from src.producers.simulator import DataSimulator
+from src.producers.simulation import StreamSimulation
 
 
 if __name__ == "__main__":
-    sim = DataSimulator()
+    sim = StreamSimulation()
     sim.start()
