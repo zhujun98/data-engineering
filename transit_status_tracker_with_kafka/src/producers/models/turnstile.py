@@ -11,8 +11,6 @@ from ..logger import logger
 from .producer import Producer
 from .utils import normalize_station_name
 
-TIME_INTERVAL = int(config['SIMULATOR']['TIME_INTERVAL'])
-
 
 class Turnstile(Producer):
     """Defines a turnstile in a train station."""
@@ -58,7 +56,8 @@ class Turnstile(Producer):
     def _get_entries(self):
         """Returns the number of turnstile entries for the given timeframe."""
         curr_datetime = datetime.datetime.utcnow()
-        time_step = datetime.timedelta(TIME_INTERVAL)
+        time_step = datetime.timedelta(
+            int(config['SIMULATOR']['TIME_INTERVAL']))
 
         hour_curve = self.curve_df[self.curve_df["hour"] == curr_datetime.hour]
         ratio = hour_curve.iloc[0]["ridership_ratio"]

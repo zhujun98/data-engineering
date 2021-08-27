@@ -58,6 +58,8 @@ To accomplish this, you must complete the following tasks:
 
 ## Running and Testing
 
+### Start the Kafka ecosystem
+
 To run the simulation, you must first start up the Kafka ecosystem in your
 local machine by:
 
@@ -80,6 +82,11 @@ Once docker-compose is ready, the following services will be available:
 | KSQL | [http://localhost:8088](http://localhost:8088) | http://ksql:8088 |
 | PostgreSQL | `jdbc:postgresql://localhost:5432/cta` | `jdbc:postgresql://postgres:5432/cta` | `cta_admin` | `chicago` |
 
+
+Check the topics at the Kafka Topics UI (http://localhost:8085) or use the CLI tools
+```sh
+docker exec broker kafka-topics --zookeeper zookeeper:2181 --list
+```
 If all the services started correctly, you should be able to see the following
 list of topics:
 ```
@@ -91,39 +98,49 @@ connect-config
 connect-offset
 connect-status
 ```
-after typing
-```sh
-docker exec broker kafka-topics --zookeeper zookeeper:2181 --list
-```
 
-### Running the Simulation
+### Run the Simulation
 
 Start all the producers by:
 ```sh
 python start_producers.py
 ```
-Test the producer alone with
-```sh
-python simple_consumer.py
-```
+
 Start the Faust stream processing application.
 ```sh
 faust -A faust_stream worker -l info
 ```
 
-
 #### To run the KSQL Creation Script:
-1. `cd consumers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `python ksql.py`
+```sh
+python ksql.py
+```
 
 #### To run the `consumer`:
+```sh
+python server.py
+```
 
-** NOTE **: Do not run the consumer until you have reached Step 6!
-1. `cd consumers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `python server.py`
+### Debug the system
+
+Test the producer alone with
+```sh
+python simple_consumer.py
+```
+
+Check the Postgres database
+```
+docker exec -it postgresdb psql -U cta_admin cta
+# List all tables.
+\dt+
+# Do your SQL queries.
+```
+
+Check Kafka connect status at the Kafka Connect UI (http://localhost:8084)
+or use the CLI tools.
+```
+# Check the status of "stations" connector.
+curl http://localhost:8083/connectors/stations/status | python -m json.tool
+# Check the task status
+curl http://localhost:8083/connectors/stations/tasks/0/status
+```

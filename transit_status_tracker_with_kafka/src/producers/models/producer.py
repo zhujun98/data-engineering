@@ -9,9 +9,6 @@ from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 from ...config import config
 from ..logger import logger
 
-BROKER_URL = config['CLUSTER']['BROKER_URL']
-SCHEMA_REGISTRY_URL = config['CLUSTER']['SCHEMA_REGISTRY_URL']
-
 
 class Producer:
     """Defines and provides common functionality amongst Producers"""
@@ -21,6 +18,8 @@ class Producer:
 
     def __init__(self, topic_name, key_schema, value_schema,
                  num_partitions=1, num_replicas=1):
+        self._broker_url = config['CLUSTER']['BROKER_URL']
+        self._schema_registry_url = config['CLUSTER']['SCHEMA_REGISTRY_URL']
         self._topic_name = topic_name
         self._key_schema = key_schema
         self._value_schema = value_schema
@@ -33,17 +32,17 @@ class Producer:
             self.existing_topics.add(self._topic_name)
 
         conf = {
-            "bootstrap.servers": BROKER_URL,
+            "bootstrap.servers": self._broker_url,
             "client.id": socket.gethostname()
             # TODO
         }
         schema_registry = CachedSchemaRegistryClient(
-            {"url": SCHEMA_REGISTRY_URL})
+            {"url": self._schema_registry_url})
         self._producer = AvroProducer(conf, schema_registry=schema_registry)
 
     def create_topic(self):
         """Creates the producer topic."""
-        client = AdminClient({"bootstrap.servers": BROKER_URL})
+        client = AdminClient({"bootstrap.servers": self._broker_url})
         # TODO: maybe add config for NewTopic
         future = client.create_topics([
             NewTopic(topic=self._topic_name,

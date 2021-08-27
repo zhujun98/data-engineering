@@ -10,8 +10,6 @@ from ...config import config
 from ..logger import logger
 from .producer import Producer
 
-REST_PROXY_URL = config["CLUSTER"]["REST_PROXY_URL"]
-
 
 class Weather(Producer):
     """Defines a simulated weather station."""
@@ -72,8 +70,9 @@ class Weather(Producer):
         """Override."""
         self._update_status()
 
+        rest_proxy_url = config['CLUSTER']['REST_PROXY_URL']
         r = requests.post(
-           f"{REST_PROXY_URL}/topics/{self._topic_name}",
+           f"{rest_proxy_url}/topics/{self._topic_name}",
            headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
            data=json.dumps({
                "key_schema": self.key_schema,
