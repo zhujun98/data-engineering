@@ -8,9 +8,8 @@ Our architecture will look like so:
 
 ![Project Architecture](images/archetecture.png)
 
-## Running and Testing
 
-### Start the Kafka ecosystem
+## Start the Kafka ecosystem
 
 To run the simulation, you must first start up the Kafka ecosystem in your
 local machine by:
@@ -27,7 +26,7 @@ Once docker-compose is ready, the following services will be available:
 | Landoop Kafka Connect UI | [http://localhost:8084](http://localhost:8084) | http://connect-ui:8084 |
 | Landoop Kafka Topics UI | [http://localhost:8085](http://localhost:8085) | http://topics-ui:8085 |
 | Landoop Schema Registry UI | [http://localhost:8086](http://localhost:8086) | http://schema-registry-ui:8086 |
-| Kafka | PLAINTEXT://localhost:9092,PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094 | PLAINTEXT://kafka0:9092,PLAINTEXT://kafka1:9093,PLAINTEXT://kafka2:9094 |
+| Kafka | PLAINTEXT://localhost:9092 | PLAINTEXT://kafka0:9092 |
 | REST Proxy | [http://localhost:8082](http://localhost:8082/) | http://rest-proxy:8082/ |
 | Schema Registry | [http://localhost:8081](http://localhost:8081/ ) | http://schema-registry:8081/ |
 | Kafka Connect | [http://localhost:8083](http://localhost:8083) | http://kafka-connect:8083 |
@@ -51,7 +50,7 @@ connect-offset
 connect-status
 ```
 
-### Run the Simulation
+## Run the Simulation
 
 Start all the producers by:
 ```sh
@@ -75,14 +74,14 @@ python server.py
 
 Open the browser to monitor the [CTA Transit Status](http://localhost:8888).
 
-### Debug the system
+## Debug the system
 
-#### Test the producer alone with
+### Test the producer alone with
 ```sh
 python simple_consumer.py
 ```
 
-#### Check the Postgres database
+### Check the Postgres database
 ```
 docker exec -it postgresdb psql -U cta_admin cta
 # List all tables.
@@ -99,7 +98,7 @@ curl http://localhost:8083/connectors/stations/status | python -m json.tool
 curl http://localhost:8083/connectors/stations/tasks/0/status
 ```
 
-#### Use the ksqlDB CLI
+### Use the ksqlDB CLI
 ```sh
 # start ksqlDB CLI
 docker exec -it ksqldb-server ksql
