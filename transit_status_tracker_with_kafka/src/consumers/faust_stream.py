@@ -27,10 +27,9 @@ class TransformedStation(faust.Record, validation=True, serializer="json"):
 
 app = faust.App("stations-stream", broker=config['KAFKA']['BROKER_ENDPOINT'])
 
-topic_name = config['CONNECTOR']['PREFIX'] + config['CONNECTOR']['NAME']
-topic = app.topic(topic_name, value_type=Station)
+topic = app.topic(config['TOPIC']['STATION_RAW'], value_type=Station)
 
-out_topic_name = config['CONSUMER']['STATION_TABLE']
+out_topic_name = config['TOPIC']['STATION_TABLE']
 out_topic = app.topic(out_topic_name, partitions=1)
 
 table = app.Table(

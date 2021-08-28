@@ -53,18 +53,18 @@ def run_server():
     # Build kafka consumers
     consumers = [
         KafkaConsumer(
-            "cta.weather.0",
+            config["TOPIC"]["WEATHER"],
             weather_model.process_message,
             offset_earliest=True,
         ),
         KafkaConsumer(
-            config["CONSUMER"]["STATION_TABLE"],
+            config["TOPIC"]["STATION_TABLE"],
             lines.process_message,
             offset_earliest=True,
             is_avro=False,
         ),
         KafkaConsumer(
-            "^cta.station.arrivals.",
+            f"^{config['TOPIC']['ARRIVAL_ROOT']}.",
             lines.process_message,
             offset_earliest=True,
         ),

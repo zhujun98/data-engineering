@@ -2,6 +2,7 @@ from pathlib import Path
 
 from confluent_kafka import avro
 
+from ...config import config
 from ...utils import normalize_station_name
 from ..logger import logger
 from .turnstile import Turnstile
@@ -19,8 +20,8 @@ class Station(Producer):
     def __init__(self, station_id: int, station_name: str, color: str):
         self._name = station_name
 
-        # <classification>.<station name>
-        topic_name = "station." + normalize_station_name(station_name)
+        topic_root = config["TOPIC"]["ARRIVAL_ROOT"]
+        topic_name = f"{topic_root}.{normalize_station_name(station_name)}.0"
         super().__init__(
             topic_name,
             key_schema=self.key_schema,

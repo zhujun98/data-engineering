@@ -3,13 +3,13 @@ from unittest.mock import patch
 import pytest
 
 from ..models.producer import AvroProducer
-from ..simulation import DataSimulator
+from ..simulation import StreamSimulation
 
 
 @patch.object(AvroProducer, "produce")
 @pytest.mark.parametrize('num_trains', [2, 10])
 def test_cta_line(mocked_producer, num_trains):
-    sim = DataSimulator(num_trains=num_trains)
+    sim = StreamSimulation(num_trains=num_trains)
     lines = sim._cta_lines
 
     assert len(lines[0]._stations) == 32

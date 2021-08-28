@@ -31,7 +31,7 @@ class Weather(Producer):
     summer_months = {6, 7, 8}
 
     def __init__(self):
-        topic_name = "weather.weather"
+        topic_name = config["TOPIC"]["WEATHER"]
         super().__init__(topic_name,
                          key_schema=self.key_schema,
                          value_schema=self.value_schema)

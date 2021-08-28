@@ -30,8 +30,8 @@ class Turnstile(Producer):
     )
 
     def __init__(self, station_id: int, station_name: str, color: str):
-        # <classification>.<station name>
-        topic_name = f"turnstile.{normalize_station_name(station_name)}"
+        topic_root = config["TOPIC"]["TURNSTILE_ROOT"]
+        topic_name = f"{topic_root}.{normalize_station_name(station_name)}.0"
         super().__init__(topic_name,
                          key_schema=self.key_schema,
                          value_schema=self.value_schema,

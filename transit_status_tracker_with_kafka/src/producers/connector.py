@@ -11,8 +11,9 @@ class PostgresConnector:
     def __init__(self):
         self._url = config["KAFKA"]["CONNECT_URL"] + "/connectors"
 
-        self._name = config["CONNECTOR"]["NAME"]
-        self._topic_prefix = config["CONNECTOR"]["PREFIX"]
+        topic_name_splitted = config["TOPIC"]["STATION_RAW"].split(".")
+        self._name = topic_name_splitted[-1]
+        self._topic_prefix = ".".join(topic_name_splitted[:-1])
 
         self._dbname = config['POSTGRES']['DBNAME']
         self._username = config['POSTGRES']['USERNAME']
@@ -37,7 +38,7 @@ class PostgresConnector:
            self._url,
            headers={"Content-Type": "application/json"},
            data=json.dumps({
-               "name": self._name,
+               "name": "stations",
                "config": {
                    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
                    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
