@@ -27,7 +27,8 @@ class KafkaConsumer:
         self._offset_earliest = offset_earliest
 
         conf = {
-            "bootstrap.servers": config["KAFKA"]["BROKER_URL"]
+            "bootstrap.servers": config["KAFKA"]["BROKER_URL"],
+            "group.id": "udacity"
         }
         if is_avro is True:
             schema_registry = CachedSchemaRegistryClient(

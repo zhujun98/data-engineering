@@ -37,7 +37,7 @@ def run_server():
         logger.fatal("Ensure that the KSQL Command has run successfully "
                      "before running the web server!")
         exit(1)
-    if topic_exists("org.chicago.cta.stations.table.v1") is False:
+    if topic_exists(config["TOPIC"]["STATION_TABLE"]) is False:
         logger.fatal("Ensure that Faust Streaming is running successfully "
                      "before running the web server!")
         exit(1)
@@ -88,7 +88,3 @@ def run_server():
         tornado.ioloop.IOLoop.current().stop()
         for consumer in consumers:
             consumer.close()
-
-
-if __name__ == "__main__":
-    run_server()

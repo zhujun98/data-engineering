@@ -38,7 +38,7 @@ class PostgresConnector:
            self._url,
            headers={"Content-Type": "application/json"},
            data=json.dumps({
-               "name": "stations",
+               "name": self._name,
                "config": {
                    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
                    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
@@ -49,7 +49,7 @@ class PostgresConnector:
                    "connection.url": f"jdbc:postgresql://{self._endpoint}/{self._dbname}",
                    "connection.user": self._username,
                    "connection.password": self._password,
-                   "table.whitelist": "stations",
+                   "table.whitelist": self._name,
                    "mode": "incrementing",
                    "incrementing.column.name": "stop_id",
                    "topic.prefix": self._topic_prefix,

@@ -73,6 +73,8 @@ Start consumers:
 python server.py
 ```
 
+Open the browser to monitor the [CTA Transit Status](http://localhost:8888).
+
 ### Debug the system
 
 #### Test the producer alone with

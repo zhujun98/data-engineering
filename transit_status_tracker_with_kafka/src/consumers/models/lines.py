@@ -2,7 +2,7 @@
 import json
 import logging
 
-from models import Line
+from .line import Line
 
 
 logger = logging.getLogger(__name__)
