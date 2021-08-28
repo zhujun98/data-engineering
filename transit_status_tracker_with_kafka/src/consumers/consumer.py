@@ -71,5 +71,5 @@ class KafkaConsumer:
         return 0
 
     def close(self):
-        """Cleans up any open kafka consumers"""
-        pass
+        """Close down and terminate the held Kafka consumer."""
+        self._consumer.close()
