@@ -8,16 +8,6 @@ Our architecture will look like so:
 
 ![Project Architecture](images/archetecture.png)
 
-### Step 6: Create Kafka Consumers
-With all of the data in Kafka, our final task is to consume the data in the web server that is going to serve the transit status pages to our commuters.
-
-To accomplish this, you must complete the following tasks:
-
-1. Complete the code in `consumers/consumer.py`
-1. Complete the code in `consumers/models/line.py`
-1. Complete the code in `consumers/models/weather.py`
-1. Complete the code in `consumers/models/station.py`
-
 ## Running and Testing
 
 ### Start the Kafka ecosystem
@@ -31,9 +21,9 @@ docker-compose up
 
 Once docker-compose is ready, the following services will be available:
 
-| Service | Host URL | Docker URL | Username | Password |
-| --- | --- | --- | --- | --- |
-| Public Transit Status | [http://localhost:8888](http://localhost:8888) | n/a | ||
+| Service | Host URL | Docker URL
+| --- | --- | --- |
+| Public Transit Status | [http://localhost:8888](http://localhost:8888) | n/a |
 | Landoop Kafka Connect UI | [http://localhost:8084](http://localhost:8084) | http://connect-ui:8084 |
 | Landoop Kafka Topics UI | [http://localhost:8085](http://localhost:8085) | http://topics-ui:8085 |
 | Landoop Schema Registry UI | [http://localhost:8086](http://localhost:8086) | http://schema-registry-ui:8086 |
@@ -42,7 +32,7 @@ Once docker-compose is ready, the following services will be available:
 | Schema Registry | [http://localhost:8081](http://localhost:8081/ ) | http://schema-registry:8081/ |
 | Kafka Connect | [http://localhost:8083](http://localhost:8083) | http://kafka-connect:8083 |
 | KSQL | [http://localhost:8088](http://localhost:8088) | http://ksql:8088 |
-| PostgreSQL | `jdbc:postgresql://localhost:5432/cta` | `jdbc:postgresql://postgres:5432/cta` | `cta_admin` | `chicago` |
+| PostgreSQL | jdbc:postgresql://localhost:5432/cta | jdbc:postgresql://postgres:5432/cta |
 
 
 Check the topics at the Kafka Topics UI (http://localhost:8085) or use the CLI tools

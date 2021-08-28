@@ -10,8 +10,9 @@ class PostgresConnector:
     """Kafka Postgres connector."""
     def __init__(self):
         self._url = config["KAFKA"]["CONNECT_URL"] + "/connectors"
-        self._name = config["KAFKA"]["CONNECTOR_NAME"]
-        self._topic_prefix = config["KAFKA"]["CONNECTOR_TOPIC_PREFIX"]
+
+        self._name = config["CONNECTOR"]["NAME"]
+        self._topic_prefix = config["CONNECTOR"]["PREFIX"]
 
         self._dbname = config['POSTGRES']['DBNAME']
         self._username = config['POSTGRES']['USERNAME']
@@ -26,12 +27,8 @@ class PostgresConnector:
         connector = f"{self._url}/{self._name}"
         r = requests.get(connector)
         if r.status_code == 200:
-            r = requests.delete(connector)
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                logger.error("Unexpected error: ", repr(e))
-            logger.info(f"Deleted existing connector: {self._name}")
+            logger.info(f"Connector already exists: {self._name}")
+            return
 
         # Caveat: The Docker URL of PostgresDB should be used for
         #         "connection.url" when running with docker-compose in your

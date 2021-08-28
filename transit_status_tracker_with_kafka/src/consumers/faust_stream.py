@@ -27,13 +27,10 @@ class TransformedStation(faust.Record, validation=True, serializer="json"):
 
 app = faust.App("stations-stream", broker=config['KAFKA']['BROKER_ENDPOINT'])
 
-connector_name = config['KAFKA']['CONNECTOR_NAME']
-topic_prefix = config['KAFKA']['CONNECTOR_TOPIC_PREFIX']
+topic_name = config['CONNECTOR']['PREFIX'] + config['CONNECTOR']['NAME']
+topic = app.topic(topic_name, value_type=Station)
 
-in_topic = app.topic(f"{topic_prefix}{connector_name}",
-                     value_type=Station)
-
-out_topic_name = f"{topic_prefix}.{connector_name}.table"
+out_topic_name = config['CONSUMER']['STATION_TABLE']
 out_topic = app.topic(out_topic_name, partitions=1)
 
 table = app.Table(
@@ -44,7 +41,7 @@ table = app.Table(
 )
 
 
-@app.agent(in_topic)
+@app.agent(topic)
 async def process(stream):
     async for v in stream:
         if v.red:
@@ -54,7 +51,8 @@ async def process(stream):
         elif v.green:
             line = 'green'
         else:
-            raise RuntimeError
+            # There are stations which do not belong to any of the above lines.
+            line = None
 
         table[v.station_id] = TransformedStation(
             v.station_id, v.station_name, v.order, line
