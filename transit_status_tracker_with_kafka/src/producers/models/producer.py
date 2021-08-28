@@ -2,7 +2,6 @@ import abc
 import socket
 import time
 
-from confluent_kafka import avro
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
@@ -13,8 +12,7 @@ from ..logger import logger
 class Producer:
     """Defines and provides common functionality amongst Producers"""
 
-    # Tracks existing topics across all Producer instances
-    existing_topics = set([])
+    _existing_topics = None
 
     def __init__(self, topic_name, key_schema, value_schema,
                  num_partitions=1, num_replicas=1):
@@ -26,10 +24,7 @@ class Producer:
         self._num_partitions = num_partitions
         self._num_replicas = num_replicas
 
-        # If the topic does not already exist, try to create it
-        if self._topic_name not in self.existing_topics:
-            self.create_topic()
-            self.existing_topics.add(self._topic_name)
+        self._maybe_create_topic()
 
         conf = {
             "bootstrap.servers": self._broker_url,
@@ -40,20 +35,31 @@ class Producer:
             {"url": self._schema_registry_url})
         self._producer = AvroProducer(conf, schema_registry=schema_registry)
 
-    def create_topic(self):
-        """Creates the producer topic."""
+    def _maybe_create_topic(self):
+        """Creates the producer topic if it does not exist."""
         client = AdminClient({"bootstrap.servers": self._broker_url})
+
+        if self._existing_topics is None:
+            # Retrieve the existing topics only once in the initialization step.
+            self._existing_topics = [
+                v.topic for v in client.list_topics(timeout=5).topics.values()]
+
+        if self._topic_name in self._existing_topics:
+            return
+
         # TODO: maybe add config for NewTopic
-        future = client.create_topics([
+        futures = client.create_topics([
             NewTopic(topic=self._topic_name,
                      num_partitions=self._num_partitions,
                      replication_factor=self._num_replicas)
         ])
-        try:
-            future.result()
-            logger.info(f"New topic created: {self._topic_name}")
-        except Exception as e:
-            logger.error(f"Failed to create topic: {self._topic_name}")
+        for _, future in futures.items():
+            try:
+                future.result()
+                logger.info(f"New topic created: {self._topic_name}")
+            except Exception:
+                logger.error(f"Failed to create topic: {self._topic_name}")
+                exit(1)
 
     @abc.abstractmethod
     def run(self):
