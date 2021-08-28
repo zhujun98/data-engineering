@@ -1,4 +1,3 @@
-"""Configures KSQL to combine station and turnstile data"""
 import json
 import logging
 
@@ -10,25 +9,23 @@ from ..utils import topic_exists
 logger = logging.getLogger(__name__)
 
 
-#
-# TODO: Complete the following KSQL statements.
-# TODO: For the first statement, create a `turnstile` table from your turnstile topic.
-#       Make sure to use 'avro' datatype!
-# TODO: For the second statment, create a `turnstile_summary` table by selecting from the
-#       `turnstile` table and grouping on station_id.
-#       Make sure to cast the COUNT of station id to `count`
-#       Make sure to set the value format to JSON
-
+# Caveat: Don't use double quotes within a ksql statement.
 KSQL_STATEMENT = """
 CREATE TABLE turnstile (
-    ???
+    station_id INT
 ) WITH (
-    ???
+    KAFKA_TOPIC='turnstile.wilson',
+    VALUE_FORMAT='AVRO',
+    KEY='station_id'
 );
 
 CREATE TABLE turnstile_summary
-WITH (???) AS
-    ???
+WITH (
+    VALUE_FORMAT='JSON'
+) AS
+    SELECT station_id, COUNT(*) AS count 
+    FROM turnstile
+    GROUP BY station_id;
 """
 
 
@@ -45,13 +42,17 @@ def execute_statement():
         data=json.dumps(
             {
                 "ksql": KSQL_STATEMENT,
-                "streamsProperties": {"ksql.streams.auto.offset.reset": "earliest"},
+                "streamsProperties": {
+                    "ksql.streams.auto.offset.reset": "earliest"
+                },
             }
         ),
     )
 
-    # Ensure that a 2XX status code was returned
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except Exception as e:
+        logger.fatal("Failed to start ksql stream processing!", repr(e))
 
 
 if __name__ == "__main__":

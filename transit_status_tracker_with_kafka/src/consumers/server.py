@@ -27,8 +27,8 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         """Responds to get requests"""
         logger.debug("rendering and writing handler template")
-        self.write(MainHandler.template.generate(weather=self.weather,
-                                                 lines=self.lines))
+        self.write(self.template.generate(weather=self.weather,
+                                          lines=self.lines))
 
 
 def run_server():
