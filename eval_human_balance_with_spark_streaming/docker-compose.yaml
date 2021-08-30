@@ -1,0 +1,140 @@
+#
+# This docker-compose file starts and runs:
+# * Redis server
+# * 1-node kafka cluster
+# * 1-zookeeper ensemble
+# * Kafka connect with Redis Source
+# * 3 Java applications- trucking-Simulation, banking-Simulation, and stedi
+# * Spark master
+# * Spark worker
+
+version: '3.7'
+
+services:
+  redis:
+    image: redis:6.0.6
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.1
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:5.5.1
+    container_name: broker
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+    depends_on:
+      - "zookeeper"
+
+  banking-simulation:
+    image: gcr.io/simulation-images/banking-simulation
+    container_name: banking-simulation
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      KAFKA_BROKER: kafka:19092
+    depends_on:
+      - "kafka"
+      - "redis"
+
+  trucking-simulation:
+    image: gcr.io/simulation-images/trucking-simulation
+    container_name: trucking-simulation
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      KAFKA_BROKER: kafka:19092
+    depends_on:
+      - "kafka"
+      - "redis"
+
+  stedi:
+    image: gcr.io/simulation-images/stedi
+    container_name: stedi
+    ports: 
+    - "4567:4567"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      KAFKA_BROKER: kafka:19092
+      KAFKA_RISK_TOPIC: your-topic-here
+    depends_on:
+      - "kafka"
+      - "redis"
+
+  connect:
+    image: gcr.io/simulation-images/kafka-connect-redis-source
+    container_name: kafka-connect-redis-source
+    ports:
+    - "8083:8083"
+    - "5005:5005"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka:19092"
+      CONNECT_GROUP_ID: "connect"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_PLUGIN_PATH: "/usr/share/java"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.converters.ByteArrayConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-config"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offset"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_DEBUG: "y"
+      DEBUG_SUSPEND_FLAG: "y"
+      CLASSPATH: "/usr/share/java/kafka-connect-redis-source/*"
+
+    depends_on:
+    - "kafka"
+    - "redis"
+
+  spark:
+    image: docker.io/bitnami/spark:3-debian-10
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./:/home/workspace/
+      - ./spark/jars:/opt/bitnami/spark/.ivy2 
+
+  spark-worker-1:
+    image: docker.io/bitnami/spark:3-debian-10
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    volumes:
+      - ./:/home/workspace/
+      - ./spark/jars:/opt/bitnami/spark/.ivy2

@@ -1,11 +1,15 @@
 #
 # This docker-compose file starts and runs:
-# * A 3-node kafka cluster
-# * A 1-zookeeper ensemble
+# * 1-node kafka cluster
+# * 1-zookeeper ensemble
 # * Schema Registry
 # * Kafka REST Proxy
 # * Kafka Connect
-#
+# * ksqlDB server
+# * Kafka connect UI
+# * Kafka topics UI
+# * Schema registry UI
+# * postgresDB
 
 version: '3.7'
 
