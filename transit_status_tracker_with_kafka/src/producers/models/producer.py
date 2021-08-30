@@ -2,10 +2,10 @@ import abc
 import socket
 import time
 
-from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
 from ...config import config
+from ...utils import client, create_topic
 from ..logger import logger
 
 
@@ -37,8 +37,6 @@ class Producer:
 
     def _maybe_create_topic(self):
         """Creates the producer topic if it does not exist."""
-        client = AdminClient({"bootstrap.servers": self._broker_url})
-
         if not self._existing_topics:
             # Retrieve the existing topics only once in the initialization step.
             self._existing_topics.update([
@@ -48,21 +46,16 @@ class Producer:
         if self._topic_name in self._existing_topics:
             return
 
-        # TODO: maybe add config for NewTopic
-        futures = client.create_topics([
-            NewTopic(topic=self._topic_name,
-                     num_partitions=self._num_partitions,
-                     replication_factor=self._num_replicas)
-        ])
-        for _, future in futures.items():
-            try:
-                future.result()
-                self._existing_topics.add(self._topic_name)
-                logger.info("New topic created: %s", self._topic_name)
-            except Exception as e:
-                logger.fatal("Failed to create topic '%s': %s",
-                             self._topic_name, repr(e))
-                exit(1)
+        try:
+            create_topic(self._topic_name,
+                         num_partitions=self._num_partitions,
+                         num_replicas=self._num_replicas)
+            self._existing_topics.add(self._topic_name)
+            logger.info("New topic created: %s", self._topic_name)
+        except Exception as e:
+            logger.fatal("Failed to create topic '%s': %s",
+                         self._topic_name, repr(e))
+            exit(1)
 
     @abc.abstractmethod
     def run(self):

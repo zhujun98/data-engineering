@@ -1,5 +1,5 @@
 """
-Process the turnstile stream with ksqlDB.
+Process the turnstile data stream with ksqlDB.
 """
 import json
 

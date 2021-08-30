@@ -1,8 +1,12 @@
+"""
+Load the station data from postgresDB with Kafka JDBC connector.
+"""
 import json
 
 import requests
 
 from ..config import config
+from ..utils import topic_exists
 from .logger import logger
 
 
@@ -11,9 +15,10 @@ class PostgresConnector:
     def __init__(self):
         self._url = config["KAFKA"]["CONNECT_URL"] + "/connectors"
 
-        topic_name_splitted = config["TOPIC"]["STATION_RAW"].split(".")
+        self._topic_name = config["TOPIC"]["STATION_RAW"]
+        topic_name_splitted = self._topic_name.split(".")
         self._name = topic_name_splitted[-1]
-        self._topic_prefix = ".".join(topic_name_splitted[:-1])
+        self._topic_prefix = ".".join(topic_name_splitted[:-1]) + "."
 
         self._dbname = config['POSTGRES']['DBNAME']
         self._username = config['POSTGRES']['USERNAME']
@@ -29,11 +34,19 @@ class PostgresConnector:
         r = requests.get(connector)
         if r.status_code == 200:
             logger.info("Connector '%s' already exists", connector)
+            if not topic_exists(self._topic_name):
+                logger.fatal("Topic '%s' not found! Delete and recreate the "
+                             "connector.", self._topic_name)
+                exit(1)
             return
 
-        # Caveat: The Docker URL of PostgresDB should be used for
+        # Caveat: 1. The Docker URL of PostgresDB should be used for
         #         "connection.url" when running with docker-compose in your
         #         local machine.
+        #         2. The topic (prefix + table name) must be created by
+        #         Kafka connect. Namely, one cannot create a topic with the
+        #         same name beforehand. In addition, automatically creating
+        #         topic in Kafka must be enabled.
         r = requests.post(
            self._url,
            headers={"Content-Type": "application/json"},
@@ -50,9 +63,13 @@ class PostgresConnector:
                    "connection.user": self._username,
                    "connection.password": self._password,
                    "table.whitelist": self._name,
-                   "mode": "incrementing",
+                   # In practice it should be set to "incrementing". However,
+                   # it is convenient to set "bulk" here for debugging and
+                   # monitoring since the postgresDB never changes.
+                   "mode": "bulk",
                    "incrementing.column.name": "stop_id",
                    "topic.prefix": self._topic_prefix,
+                   # In practice it can be as high as one hour.
                    "poll.interval.ms": "10000",
                }
            }),
@@ -60,9 +77,8 @@ class PostgresConnector:
 
         try:
             r.raise_for_status()
-        except Exception as e:
-            logger.critical(
-                "Failed when creating the kafka connector: ", repr(e))
+            logger.info("Connector '%s' created", connector)
+        except Exception:
+            logger.fatal("Failed when creating the kafka connector: %s, %s",
+                         r.reason, r.text)
             exit(1)
-
-        logger.info(f"Connector created successfully: {self._name}")

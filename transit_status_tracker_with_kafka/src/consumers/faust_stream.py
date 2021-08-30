@@ -1,3 +1,6 @@
+"""
+Process the station data stream with faust.
+"""
 import faust
 
 from ..config import config
@@ -25,9 +28,10 @@ class TransformedStation(faust.Record, validation=True, serializer="json"):
     line: str
 
 
-app = faust.App("stations-stream", broker=config['KAFKA']['BROKER_ENDPOINT'])
+app = faust.App("stations-stream",
+                broker=f"kafka://{config['KAFKA']['BROKER_ENDPOINT']}")
 
-topic = app.topic(config['TOPIC']['STATION_RAW'], value_type=Station)
+topic_name = config['TOPIC']['STATION_RAW']
 
 out_topic_name = config['TOPIC']['STATION_TABLE']
 out_topic = app.topic(out_topic_name, partitions=1)
@@ -40,7 +44,8 @@ table = app.Table(
 )
 
 
-@app.agent(topic)
+# TODO: Add debug information
+@app.agent(app.topic(topic_name, value_type=Station))
 async def process(stream):
     async for v in stream:
         if v.red:
