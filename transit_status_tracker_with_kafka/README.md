@@ -8,7 +8,6 @@ Our architecture will look like so:
 
 ![Project Architecture](images/archetecture.png)
 
-
 ## Start the Kafka ecosystem
 
 To run the simulation, you must first start up the Kafka ecosystem in your
@@ -51,6 +50,12 @@ connect-status
 ```
 
 ## Run the Simulation
+
+```sh
+conda create -n dsnd python==3.7
+conda activate dsnd
+pip install -r requirements.txt
+```
 
 Start all the producers by:
 ```sh
