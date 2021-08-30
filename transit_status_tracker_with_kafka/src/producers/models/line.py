@@ -1,5 +1,6 @@
 from pandas import DataFrame
 
+from ...config import config
 from .producer import Producer
 from .station import Station
 from .train import Train
@@ -14,8 +15,7 @@ class CTALine(Producer):
         self._color = color.lower()
         if self._color not in self._colors:
             raise ValueError(f"CTALine color must be one of: {self._colors}")
-        topic_name = f"line.{self._color}"
-        super().__init__(topic_name, None, None)
+        super().__init__(config["TOPIC"]["LINE"], None, None)
 
         self._stations = self._initialize_line(station_df)
 

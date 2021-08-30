@@ -13,7 +13,7 @@ KSQL_STATEMENT = """
 CREATE TABLE turnstile (
     station_id INT
 ) WITH (
-    KAFKA_TOPIC='turnstile.wilson',
+    KAFKA_TOPIC=config['TOPIC']['TURNSTILE'],
     VALUE_FORMAT='AVRO',
     KEY='station_id'
 );

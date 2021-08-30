@@ -9,7 +9,6 @@ from confluent_kafka import avro
 from ...config import config
 from ..logger import logger
 from .producer import Producer
-from ...utils import normalize_station_name
 
 
 class Turnstile(Producer):
@@ -30,9 +29,7 @@ class Turnstile(Producer):
     )
 
     def __init__(self, station_id: int, station_name: str, color: str):
-        topic_root = config["TOPIC"]["TURNSTILE_ROOT"]
-        topic_name = f"{topic_root}.{normalize_station_name(station_name)}.0"
-        super().__init__(topic_name,
+        super().__init__(config["TOPIC"]["TURNSTILE"],
                          key_schema=self.key_schema,
                          value_schema=self.value_schema,
                          num_partitions=1,

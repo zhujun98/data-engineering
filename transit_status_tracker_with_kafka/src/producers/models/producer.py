@@ -12,7 +12,7 @@ from ..logger import logger
 class Producer:
     """Defines and provides common functionality amongst Producers"""
 
-    _existing_topics = None
+    _existing_topics = set()
 
     def __init__(self, topic_name, key_schema, value_schema,
                  num_partitions=1, num_replicas=1):
@@ -39,10 +39,11 @@ class Producer:
         """Creates the producer topic if it does not exist."""
         client = AdminClient({"bootstrap.servers": self._broker_url})
 
-        if self._existing_topics is None:
+        if not self._existing_topics:
             # Retrieve the existing topics only once in the initialization step.
-            self._existing_topics = [
-                v.topic for v in client.list_topics(timeout=5).topics.values()]
+            self._existing_topics.update([
+                v.topic for v in client.list_topics(timeout=5).topics.values()])
+            logger.info(f"Found existing topics: {self._existing_topics}")
 
         if self._topic_name in self._existing_topics:
             return
@@ -56,6 +57,7 @@ class Producer:
         for _, future in futures.items():
             try:
                 future.result()
+                self._existing_topics.add(self._topic_name)
                 logger.info(f"New topic created: {self._topic_name}")
             except Exception:
                 logger.error(f"Failed to create topic: {self._topic_name}")
