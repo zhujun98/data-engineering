@@ -1,8 +1,5 @@
 """Contains functionality related to Weather"""
-import logging
-
-
-logger = logging.getLogger(__name__)
+from ..logger import logger
 
 
 class Weather:

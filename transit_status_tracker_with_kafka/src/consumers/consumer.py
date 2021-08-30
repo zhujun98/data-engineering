@@ -8,9 +8,7 @@ from confluent_kafka.avro.serializer import SerializerError
 from tornado import gen
 
 from ..config import config
-
-
-logger = logging.getLogger(__name__)
+from .logger import logger
 
 
 class KafkaConsumer:

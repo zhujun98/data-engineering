@@ -43,7 +43,7 @@ class Producer:
             # Retrieve the existing topics only once in the initialization step.
             self._existing_topics.update([
                 v.topic for v in client.list_topics(timeout=5).topics.values()])
-            logger.info(f"Found existing topics: {self._existing_topics}")
+            logger.info("Found existing topics: %s", self._existing_topics)
 
         if self._topic_name in self._existing_topics:
             return
@@ -58,9 +58,10 @@ class Producer:
             try:
                 future.result()
                 self._existing_topics.add(self._topic_name)
-                logger.info(f"New topic created: {self._topic_name}")
-            except Exception:
-                logger.error(f"Failed to create topic: {self._topic_name}")
+                logger.info("New topic created: %s", self._topic_name)
+            except Exception as e:
+                logger.fatal("Failed to create topic '%s': %s",
+                             self._topic_name, repr(e))
                 exit(1)
 
     @abc.abstractmethod

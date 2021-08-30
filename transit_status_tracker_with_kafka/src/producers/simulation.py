@@ -38,15 +38,10 @@ class StreamSimulation:
     def start(self):
         logger.info("Beginning simulation, press Ctrl+C to exit at any time")
 
-        logger.info("Loading kafka connect jdbc source connector")
         self._connector.start()
 
-        logger.info("Beginning CTA train simulation")
         try:
             while True:
-                logger.debug(f"Simulation running: "
-                             f"{datetime.datetime.utcnow().isoformat()}")
-
                 self._weather_station.run()
 
                 for line in self._cta_lines:

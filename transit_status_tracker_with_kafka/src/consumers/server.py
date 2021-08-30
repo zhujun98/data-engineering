@@ -64,12 +64,12 @@ def run_server():
             is_avro=False,
         ),
         KafkaConsumer(
-            f"^{config['TOPIC']['ARRIVAL_ROOT']}.",
+            config['TOPIC']['ARRIVAL'],
             lines.process_message,
             offset_earliest=True,
         ),
         KafkaConsumer(
-            "TURNSTILE_SUMMARY",
+            config['TOPIC']['TURNSTILE_TABLE'],
             lines.process_message,
             offset_earliest=True,
             is_avro=False,

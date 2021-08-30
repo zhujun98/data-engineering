@@ -1,9 +1,3 @@
-"""Contains functionality related to Stations"""
-import json
-import logging
-
-
-logger = logging.getLogger(__name__)
 
 
 class Station:

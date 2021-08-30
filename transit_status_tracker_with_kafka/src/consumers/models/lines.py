@@ -1,11 +1,8 @@
 """Contains functionality related to Lines"""
 import json
-import logging
 
+from ..logger import logger
 from .line import Line
-
-
-logger = logging.getLogger(__name__)
 
 
 class Lines:

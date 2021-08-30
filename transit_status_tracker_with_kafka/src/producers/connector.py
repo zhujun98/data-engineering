@@ -28,7 +28,7 @@ class PostgresConnector:
         connector = f"{self._url}/{self._name}"
         r = requests.get(connector)
         if r.status_code == 200:
-            logger.info(f"Connector already exists: {self._name}")
+            logger.info("Connector '%s' already exists", connector)
             return
 
         # Caveat: The Docker URL of PostgresDB should be used for

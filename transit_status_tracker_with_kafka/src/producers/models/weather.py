@@ -91,10 +91,7 @@ class Weather(Producer):
         try:
             r.raise_for_status()
         except Exception as e:
-            logger.error("Failed when posting weather data: ", repr(e))
+            logger.error("Failed when posting weather data: %s", repr(e))
 
-        logger.debug(
-            f"Update weather - "
-            f"temp: {self._temp:.1f}, "
-            f"status: {self._status.name}"
-        )
+        logger.debug("Update weather - temp: %s, status: %s",
+                     self._temp, self._status.name)
