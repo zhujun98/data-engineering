@@ -4,4 +4,5 @@ from pathlib import Path
 
 fileConfig(f"{Path(__file__).parents[2]}/logging.ini")
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("consumer")
+logger.setLevel("DEBUG")

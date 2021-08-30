@@ -92,4 +92,4 @@ class Turnstile(Producer):
                 value_schema=self._value_schema
             )
 
-            logger.info(f"{n_entries} entries in {self._station_name}")
+            logger.debug(f"{n_entries} entries in {self._station_name}")

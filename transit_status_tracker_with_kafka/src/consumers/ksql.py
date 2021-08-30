@@ -4,9 +4,8 @@ import logging
 import requests
 
 from ..config import config
+from .logger import logger
 from ..utils import topic_exists
-
-logger = logging.getLogger(__name__)
 
 
 # Caveat: Don't use double quotes within a ksql statement.
@@ -31,10 +30,10 @@ WITH (
 
 def execute_statement():
     """Executes the KSQL statement against the KSQL API"""
-    if topic_exists("TURNSTILE_SUMMARY") is True:
+    if topic_exists("TURNSTILE_SUMMARY"):
         return
 
-    logging.debug("executing ksql statement...")
+    logger.info("Executing ksql statement...")
 
     resp = requests.post(
         f"{config['KSQL']['URL']}/ksql",

@@ -68,14 +68,16 @@ class Station(Producer):
         self._a_train = train
         self._produce_message(train.train_id, "a", train.status.name,
                               prev_station_id, prev_direction)
-        logger.info(f"{self._name} -> {self.a_station._name}: {train.train_id}")
+        logger.debug(
+            f"{self._name} -> {self.a_station._name}: {train.train_id}")
 
     def set_b_train(self, train, prev_station_id=None, prev_direction=None):
         """Register a train that will travel to the b direction."""
         self._b_train = train
         self._produce_message(train.train_id, "b", train.status.name,
                               prev_station_id, prev_direction)
-        logger.info(f"{self._name} -> {self.b_station._name}: {train.train_id}")
+        logger.debug(
+            f"{self._name} -> {self.b_station._name}: {train.train_id}")
 
     def _produce_message(self, train_id, direction, status,
                          prev_station_id, prev_direction):
