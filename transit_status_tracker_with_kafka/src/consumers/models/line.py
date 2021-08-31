@@ -1,11 +1,16 @@
 import json
 
+from ...config import config
 from ..logger import logger
 from .station import Station
 
 
 class Line:
     """Defines the Line Model"""
+
+    STATION_TABLE = config["TOPIC"]["STATION_TABLE"]
+    ARRIVAL = config["TOPIC"]["ARRIVAL"]
+    TURNSTILE_TABLE_TOPIC = config["TOPIC"]["TURNSTILE_TABLE"]
 
     def __init__(self, color):
         """Creates a line"""
@@ -53,15 +58,15 @@ class Line:
     def process_message(self, message):
         """Given a kafka message, extract data"""
         # TODO: Based on the message topic, call the appropriate handler.
-        if True: # Set the conditional correctly to the stations Faust Table
+        if self.STATION_TABLE == message.topic():
             try:
                 value = json.loads(message.value())
                 self._handle_station(value)
             except Exception as e:
                 logger.fatal("bad station? %s, %s", value, e)
-        elif True: # Set the conditional to the arrival topic
+        elif self.ARRIVAL == message.topic():
             self._handle_arrival(message)
-        elif True: # Set the conditional to the KSQL Turnstile Summary Topic
+        elif self.TURNSTILE_TABLE_TOPIC == message.topic():
             json_data = json.loads(message.value())
             station_id = json_data.get("STATION_ID")
             station = self.stations.get(station_id)

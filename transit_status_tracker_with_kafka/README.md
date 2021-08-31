@@ -57,24 +57,24 @@ conda activate dsnd
 pip install -r requirements.txt
 ```
 
-Start all the producers by:
+Start producers by:
 ```sh
 python start_producers.py
 ```
 
-Start the Faust stream processing application.
+Start stream processing with Faust:
 ```sh
 python start_faust_app.py worker
 ```
 
-Run the KSQL Creation Script:
+Start stream processing with KSQL:
 ```sh
-python ksql.py
+python start_ksql.py
 ```
 
-Start consumers:
+Start consumers and launch the web monitor:
 ```sh
-python server.py
+python start_server.py
 ```
 
 Open the browser to monitor the [CTA Transit Status](http://localhost:8888).

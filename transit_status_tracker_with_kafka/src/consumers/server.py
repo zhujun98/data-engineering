@@ -33,11 +33,11 @@ class MainHandler(tornado.web.RequestHandler):
 
 def run_server():
     """Runs the Tornado Server and begins Kafka consumption"""
-    if topic_exists("TURNSTILE_SUMMARY") is False:
+    if not topic_exists("TURNSTILE_SUMMARY"):
         logger.fatal("Ensure that the KSQL Command has run successfully "
                      "before running the web server!")
         exit(1)
-    if topic_exists(config["TOPIC"]["STATION_TABLE"]) is False:
+    if not topic_exists(config["TOPIC"]["STATION_TABLE"]):
         logger.fatal("Ensure that Faust Streaming is running successfully "
                      "before running the web server!")
         exit(1)
@@ -84,7 +84,7 @@ def run_server():
 
         tornado.ioloop.IOLoop.current().start()
     except KeyboardInterrupt as e:
-        logger.info("shutting down server")
+        logger.info("Shutting down server ...")
         tornado.ioloop.IOLoop.current().stop()
         for consumer in consumers:
             consumer.close()

@@ -1,8 +1,6 @@
 """Defines core consumer functionality"""
-import logging
-
 import confluent_kafka
-from confluent_kafka import Consumer
+from confluent_kafka import Consumer, OFFSET_BEGINNING
 from confluent_kafka.avro import AvroConsumer, CachedSchemaRegistryClient
 from confluent_kafka.avro.serializer import SerializerError
 from tornado import gen
@@ -26,7 +24,7 @@ class KafkaConsumer:
 
         conf = {
             "bootstrap.servers": config["KAFKA"]["BROKER_URL"],
-            "group.id": "udacity"
+            "group.id": "0"
         }
         if is_avro is True:
             schema_registry = CachedSchemaRegistryClient(
@@ -39,14 +37,13 @@ class KafkaConsumer:
             [self._topic_name_pattern], on_assign=self._on_assign)
 
     def _on_assign(self, consumer, partitions):
-        """Callback for when topic assignment takes place."""
-        # TODO: If the topic is configured to use `offset_earliest` set the partition offset to
-        # the beginning or earliest
-        for partition in partitions:
-            pass
-
-        logger.info("partitions assigned for %s", self._topic_name_pattern)
+        """Callback to provide handling of customized offsets."""
+        if self._offset_earliest:
+            for partition in partitions:
+                partition.offset = OFFSET_BEGINNING
         consumer.assign(partitions)
+
+        logger.info("Partitions assigned for %s", self._topic_name_pattern)
 
     async def consume(self):
         """Asynchronously consumes data from kafka topic."""
@@ -58,15 +55,15 @@ class KafkaConsumer:
 
     def _consume(self):
         """Polls for a message. Returns 1 if a message was received, 0 otherwise"""
-        #
-        #
-        # TODO: Poll Kafka for messages. Make sure to handle any errors or exceptions.
-        # Additionally, make sure you return 1 when a message is processed, and 0 when no message
-        # is retrieved.
-        #
-        #
-        logger.info("_consume is incomplete - skipping")
-        return 0
+        message = self._consumer.poll(1.)
+        if message is None:
+            logger.debug("No message received by consumer")
+            return 0
+        if message.error() is not None:
+            logger.error("Error from consumer: %s", message.error())
+            return 0
+        self._message_handler(message)
+        return 1
 
     def close(self):
         """Close down and terminate the held Kafka consumer."""
