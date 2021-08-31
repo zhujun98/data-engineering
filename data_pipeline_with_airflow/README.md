@@ -3,7 +3,7 @@
 Jun Zhu
 ___
 
-![](architecture.jpg)
+<img src="./architecture.jpg" alt="drawing" width="340"/>
 
 A music streaming company, Sparkify, has decided that it is time to introduce 
 more automation and monitoring to their data warehouse ETL pipelines and come 

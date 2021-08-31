@@ -3,7 +3,7 @@
 Jun Zhu
 ___
 
-![](architecture.jpg)
+<img src="./architecture.jpg" alt="drawing" width="480"/>
 
 A music streaming startup, Sparkify, has grown their user base and song database 
 and want to move their processes and data onto the cloud. Their data resides in 

@@ -17,19 +17,19 @@ Jun Zhu
 - [Data Modeling with Apache Cassandra](./data_modeling_with_apache_cassandra)
 - [Data Warehouse with AWS Redshift](./data_warehouse_with_redshift)
   
-  ![](./data_warehouse_with_redshift/architecture.jpg)
+  <img src="./data_warehouse_with_redshift/architecture.jpg" alt="drawing" width="480"/>
 
 - [Data Lake with Apache Spark](./data_lake_with_spark)
   
-  ![](./data_lake_with_spark/architecture.jpg)
+  <img src="./data_lake_with_spark/architecture.jpg" alt="drawing" width="480"/>
 
 - [Data Pipeline with Apache Airflow](./data_pipeline_with_airflow)
   
-  ![](./data_pipeline_with_airflow/architecture.jpg)
+  <img src="./data_pipeline_with_airflow/architecture.jpg" alt="drawing" width="340"/>
 
 - [Data Engineering Capstone Project](./dend_capstone_project)
 
-  ![](./dend_capstone_project/architecture.jpg)
+  <img src="./dend_capstone_project/architecture.jpg" alt="drawing" width="540"/>
 
 
 ## Udacity Data Streaming Nanodegree

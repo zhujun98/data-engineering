@@ -13,7 +13,7 @@ ___
 
 ## Step 1: Scope the project and gather data
 
-![](./architecture.jpg)
+<img src="./architecture.jpg" alt="drawing" width="540"/>
 
 ### Introduction
 
