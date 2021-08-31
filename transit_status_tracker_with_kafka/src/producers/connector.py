@@ -25,7 +25,7 @@ class PostgresConnector:
         self._password = config['POSTGRES']['PASSWORD']
         self._endpoint = config['POSTGRES']['ENDPOINT']
 
-    def start(self):
+    async def run(self):
         """Start a kafka JDBC connector.
 
         Delete the old connector if it already exists.

@@ -43,9 +43,9 @@ class Station(Producer):
         self.a_station = None  # next station in the a direction
         self.b_station = None  # next station in the b direction
 
-    def run(self):
+    async def run(self):
         """Override."""
-        self._turnstile.run()
+        await self._turnstile.run()
 
         if self._a_arriving is not None:
             if self.a_station is not None:

@@ -59,7 +59,7 @@ pip install -r requirements.txt
 
 Start producers by:
 ```sh
-python start_producers.py
+python start_simulation.py
 ```
 
 Start stream processing with Faust:

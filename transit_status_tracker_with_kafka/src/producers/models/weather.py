@@ -1,3 +1,4 @@
+import asyncio
 from enum import IntEnum
 import json
 from pathlib import Path
@@ -40,6 +41,7 @@ class Weather(Producer):
         self._temp = None
 
         self._initialized = False
+        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
 
     def _update_status(self):
         month = datetime.datetime.now().month
@@ -66,32 +68,35 @@ class Weather(Producer):
 
         self._status = random.choice(list(self.Status))
 
-    def run(self):
+    async def run(self):
         """Override."""
-        self._update_status()
+        while True:
+            self._update_status()
 
-        rest_proxy_url = config['KAFKA']['REST_PROXY_URL']
-        r = requests.post(
-           f"{rest_proxy_url}/topics/{self._topic_name}",
-           headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
-           data=json.dumps({
-               "key_schema": self.key_schema,
-               "value_schema": self.value_schema,
-               "records": [{
-                    "key": {
-                        "timestamp": self.time_millis()
-                    },
-                    "value": {
-                        "temperature": self._temp,
-                        "status": self._status.name
-                    },
-                }]
-            })
-        )
-        try:
-            r.raise_for_status()
-        except Exception as e:
-            logger.error("Failed when posting weather data: %s", repr(e))
+            rest_proxy_url = config['KAFKA']['REST_PROXY_URL']
+            r = requests.post(
+               f"{rest_proxy_url}/topics/{self._topic_name}",
+               headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
+               data=json.dumps({
+                   "key_schema": self.key_schema,
+                   "value_schema": self.value_schema,
+                   "records": [{
+                        "key": {
+                            "timestamp": self.time_millis()
+                        },
+                        "value": {
+                            "temperature": self._temp,
+                            "status": self._status.name
+                        },
+                    }]
+                })
+            )
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                logger.error("Failed when posting weather data: %s", repr(e))
 
-        logger.debug("Update weather - temp: %s, status: %s",
-                     self._temp, self._status.name)
+            logger.debug("Update weather - temp: %s, status: %s",
+                         self._temp, self._status.name)
+
+            await asyncio.sleep(self._time_interval)

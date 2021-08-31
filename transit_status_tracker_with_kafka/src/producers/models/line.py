@@ -1,3 +1,4 @@
+import asyncio
 from pandas import DataFrame
 
 from ...config import config
@@ -24,6 +25,8 @@ class CTALine(Producer):
         self._num_trains = num_trains
 
         self._initialize_trains()
+
+        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
 
     def _initialize_line(self, station_df: DataFrame):
         """Initialize stations on the line."""
@@ -70,12 +73,15 @@ class CTALine(Producer):
                 self._stations[loc].set_a_train(train)
                 loc -= step_size
 
-    def run(self):
+    async def run(self):
         """Override."""
-        for station in self._stations:
-            station.advance()
-        for station in self._stations:
-            station.run()
+        while True:
+            for station in self._stations:
+                station.advance()
+            for station in self._stations:
+                await station.run()
+
+            await asyncio.sleep(self._time_interval)
 
     def close(self):
         """Override."""

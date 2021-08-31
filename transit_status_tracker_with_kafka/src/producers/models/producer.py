@@ -58,7 +58,7 @@ class Producer:
             exit(1)
 
     @abc.abstractmethod
-    def run(self):
+    async def run(self):
         pass
 
     def close(self):

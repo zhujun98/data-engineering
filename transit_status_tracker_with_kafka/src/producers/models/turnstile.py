@@ -50,6 +50,8 @@ class Turnstile(Producer):
             round(self.metrics_df.iloc[0]["avg_sunday-holiday_rides"])
         )
 
+        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
+
     def _get_entries(self):
         """Returns the number of turnstile entries for the given timeframe."""
         curr_datetime = datetime.datetime.utcnow()
@@ -73,7 +75,7 @@ class Turnstile(Producer):
         # Introduce some randomness in the data
         return max(num_entries + random.choice(range(-5, 5)), 0)
 
-    def run(self):
+    async def run(self):
         """Override."""
         n_entries = self._get_entries()
         for _ in range(n_entries):

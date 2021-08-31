@@ -7,11 +7,12 @@ def consume(broker_url, schema_registry_url):
     schema_registry = CachedSchemaRegistryClient({"url": schema_registry_url})
     conf = {
         "bootstrap.servers": broker_url,
-        "group.id": "A"
+        "group.id": "0",
+        "auto.offset.reset": "earliest"
     }
 
     consumer = AvroConsumer(conf, schema_registry=schema_registry)
-    consumer.subscribe(["^tracking.*", "^streaming.*", "^db.*"])
+    consumer.subscribe(["^tracking.*", "^streaming.*"])
 
     while True:
         msg = consumer.poll(1.0)

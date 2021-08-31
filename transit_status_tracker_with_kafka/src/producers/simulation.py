@@ -1,4 +1,4 @@
-import time
+import asyncio
 from pathlib import Path
 
 import pandas as pd
@@ -16,8 +16,6 @@ class StreamSimulation:
 
         :param num_trains: Number of trains for each CTA line.
         """
-        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
-
         self._raw_df = pd.read_csv(
             f"{Path(__file__).parents[0]}/data/cta_stations.csv"
         ).sort_values("order")
@@ -37,18 +35,13 @@ class StreamSimulation:
     def start(self):
         logger.info("Beginning simulation, press Ctrl+C to exit at any time")
 
-        self._connector.start()
-
         try:
-            while True:
-                self._weather_station.run()
-
-                for line in self._cta_lines:
-                    line.run()
-
-                time.sleep(self._time_interval)
-
-        except KeyboardInterrupt as e:
+            asyncio.run(asyncio.wait(
+                [self._connector.run(),
+                 self._weather_station.run(),
+                 *[line.run() for line in self._cta_lines]]
+            ))
+        except KeyboardInterrupt:
             logger.info("Shutting down ...")
             for line in self._cta_lines:
                 line.close()
