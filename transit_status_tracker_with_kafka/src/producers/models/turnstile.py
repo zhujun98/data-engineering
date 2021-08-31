@@ -50,13 +50,14 @@ class Turnstile(Producer):
             round(self.metrics_df.iloc[0]["avg_sunday-holiday_rides"])
         )
 
-        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
+        self._time_interval = float(
+            config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL'])
 
     def _get_entries(self):
         """Returns the number of turnstile entries for the given timeframe."""
         curr_datetime = datetime.datetime.utcnow()
         time_step = datetime.timedelta(
-            int(config['SIMULATOR']['TIME_INTERVAL']))
+            float(config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL']))
 
         hour_curve = self.curve_df[self.curve_df["hour"] == curr_datetime.hour]
         ratio = hour_curve.iloc[0]["ridership_ratio"]

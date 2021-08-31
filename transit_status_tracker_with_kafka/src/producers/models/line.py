@@ -26,7 +26,8 @@ class CTALine(Producer):
 
         self._initialize_trains()
 
-        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
+        self._time_interval = float(
+            config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL'])
 
     def _initialize_line(self, station_df: DataFrame):
         """Initialize stations on the line."""

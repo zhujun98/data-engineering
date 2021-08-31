@@ -41,7 +41,8 @@ class Weather(Producer):
         self._temp = None
 
         self._initialized = False
-        self._time_interval = int(config['SIMULATOR']['TIME_INTERVAL'])
+        self._time_interval = float(
+            config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL'])
 
     def _update_status(self):
         month = datetime.datetime.now().month

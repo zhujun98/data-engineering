@@ -10,8 +10,6 @@ from .logger import logger
 
 
 class KafkaConsumer:
-    """Defines the base kafka consumer class"""
-
     def __init__(self,
                  topic_name_pattern,
                  message_handler,
@@ -22,9 +20,13 @@ class KafkaConsumer:
         self._message_handler = message_handler
         self._offset_earliest = offset_earliest
 
+        self._time_interval = float(
+            config["PARAM"]["CONSUMER_POLL_TIME_INTERVAL"])
+
         conf = {
             "bootstrap.servers": config["KAFKA"]["BROKER_URL"],
-            "group.id": "0"
+            "group.id": "0",
+            "auto.offset.reset": "earliest"
         }
         if is_avro is True:
             schema_registry = CachedSchemaRegistryClient(
@@ -55,7 +57,7 @@ class KafkaConsumer:
 
     def _consume(self):
         """Polls for a message. Returns 1 if a message was received, 0 otherwise"""
-        message = self._consumer.poll(1.)
+        message = self._consumer.poll(self._time_interval)
         if message is None:
             logger.debug("No message received by consumer")
             return 0

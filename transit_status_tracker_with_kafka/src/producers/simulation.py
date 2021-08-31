@@ -22,7 +22,7 @@ class StreamSimulation:
 
         # simulated train and turnstile data via AvroProducer
         if num_trains is None:
-            num_trains = int(config["SIMULATOR"]["NUM_TRAINS"])
+            num_trains = int(config["PARAM"]["NUM_TRAINS"])
         self._cta_lines = [CTALine(c, self._raw_df, num_trains=num_trains)
                            for c in ('blue', 'red', 'green')]
 
