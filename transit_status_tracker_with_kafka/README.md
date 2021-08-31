@@ -6,7 +6,7 @@ and ecosystem tools like REST Proxy and Kafka Connect to accomplish this task.
 
 Our architecture will look like so:
 
-![Project Architecture](images/archetecture.png)
+![Project Architecture](./architecture.jpg)
 
 ## Start the Kafka ecosystem
 

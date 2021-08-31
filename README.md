@@ -35,4 +35,7 @@ Jun Zhu
 ## Udacity Data Streaming Nanodegree
 
 - [Transit Status Tracker with Kafka](./transit_status_tracker_with_kafka)
+
+  ![](./transit_status_tracker_with_kafka/architecture.jpg)
+
 - [Evaluate Human Balance with Spark Streaming](./eval_human_balance_with_spark_streaming)
