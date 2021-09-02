@@ -144,6 +144,7 @@ acounts for the daily fluctuation of the business. Another dimension table,
 
 ### Test on a standalone Spark cluster locally (optional)
 
+You will need a local spark cluster mentioned in step 2.
 ```sh
 sudo docker build -t capstone-project-spark-cluster .
 
