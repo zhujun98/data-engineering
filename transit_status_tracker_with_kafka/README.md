@@ -10,9 +10,6 @@ Our architecture will look like so:
 
 ## Start the Kafka ecosystem
 
-To run the simulation, you must first start up the Kafka ecosystem in your
-local machine by:
-
 ```bash
 docker-compose up
 ```
