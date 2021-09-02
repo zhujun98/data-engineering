@@ -49,13 +49,15 @@ connect-offset
 connect-status
 ```
 
-## Run the Simulation
+## Start the data pipeline and the web server
 
 ```sh
 conda create -n dsnd python==3.7
 conda activate dsnd
 pip install -r requirements.txt
 ```
+
+Kafka topics and system parameters are defined in `config.ini`.
 
 Start producers by:
 ```sh
