@@ -1,4 +1,6 @@
 """Defines a Tornado Server that consumes Kafka Event data for display"""
+from dataclasses import dataclass, field
+import json
 from pathlib import Path
 
 import tornado.ioloop
@@ -8,32 +10,106 @@ import tornado.web
 from ..config import config
 from ..utils import topic_exists
 from .consumer import KafkaConsumer
-from .models import Lines, Weather
 from .logger import logger
 
 
+@dataclass
+class Weather:
+    temperature: float
+    status: str
+
+
+@dataclass
+class Line:
+    color_code: str
+    stations: dict = field(default_factory=dict)
+
+
+@dataclass
+class Train:
+    id: str
+    status: str
+
+@dataclass
+class Station:
+    id: int
+    name: str
+    order: int
+    direction_a: Train = None
+    direction_b: Train = None
+    turnstile_entries: int = 0
+
+
+weather = Weather(-1, "unknown")
+lines = {
+    "red": Line("#DC143C"),
+    "blue": Line("#1E90FF"),
+    "green": Line("#32CD32")
+}
+
+
+def process_weather(msg):
+    value = msg.value()
+    weather.temperature = value['temperature']
+    weather.status = value['status']
+
+
+def process_station_table(msg):
+    value = json.loads(msg.value())
+    line = value["line"]
+    if line in lines:
+        lines[line].stations[value["station_id"]] = Station(
+            value["station_id"], value["station_name"], value["order"]
+        )
+
+
+def process_turnstile(msg):
+    value = json.loads(msg.value())
+    # Caveat: keys are all capital letters from KSQL
+    line = value["LINE"]
+    try:
+        lines[line].stations[value["STATION_ID"]].turnstile_entries = value["COUNT"]
+    except KeyError:
+        pass
+
+
+def process_arrival(msg):
+    value = msg.value()
+    line = value["line"]
+
+    try:
+        # handle arrival
+        station = lines[line].stations[value["station_id"]]
+        train = Train(value["train_id"], value["train_status"])
+        if value["direction"] == "a":
+            station.direction_a = train
+        else:
+            station.direction_b = train
+
+        # handle departure
+        prev_station = lines[line].stations[value["prev_station_id"]]
+        if value["prev_direction"] == "a":
+            prev_station.direction_a = None
+        else:
+            prev_station.direction_b = None
+    except KeyError:
+        pass
+
+
 class MainHandler(tornado.web.RequestHandler):
-    """Defines a web request handler class."""
 
-    template_dir = tornado.template.Loader(
-        f"{Path(__file__).parents[0]}/templates")
-    template = template_dir.load("status.html")
-
-    def initialize(self, weather, lines):
-        """Initializes the handler with required configuration"""
-        self.weather = weather
-        self.lines = lines
+    loader = tornado.template.Loader(f"{Path(__file__).parents[0]}/templates")
+    template = loader.load("status.html")
 
     def get(self):
         """Responds to get requests"""
         logger.debug("rendering and writing handler template")
-        self.write(self.template.generate(weather=self.weather,
-                                          lines=self.lines))
+        self.write(self.template.generate(weather=weather, lines=lines))
 
 
 def run_server():
     """Runs the Tornado Server and begins Kafka consumption"""
-    if not topic_exists("TURNSTILE_SUMMARY"):
+    if not topic_exists(config["TOPIC"]["TURNSTILE_TABLE"]):
         logger.fatal("Ensure that the KSQL Command has run successfully "
                      "before running the web server!")
         exit(1)
@@ -42,49 +118,44 @@ def run_server():
                      "before running the web server!")
         exit(1)
 
-    weather_model = Weather()
-    lines = Lines()
-
-    application = tornado.web.Application(
-        [(r"/", MainHandler, {"weather": weather_model, "lines": lines})]
-    )
-    application.listen(8888)
-
     # Build kafka consumers
     consumers = [
         KafkaConsumer(
             config["TOPIC"]["WEATHER"],
-            weather_model.process_message,
-            offset_earliest=True,
+            process_weather,
         ),
         KafkaConsumer(
             config["TOPIC"]["STATION_TABLE"],
-            lines.process_message,
-            offset_earliest=True,
+            process_station_table,
             is_avro=False,
         ),
         KafkaConsumer(
             config['TOPIC']['ARRIVAL'],
-            lines.process_message,
-            offset_earliest=True,
+            process_arrival,
         ),
         KafkaConsumer(
             config['TOPIC']['TURNSTILE_TABLE'],
-            lines.process_message,
-            offset_earliest=True,
+            process_turnstile,
             is_avro=False,
-        ),
+        )
     ]
+
+    # a wrapper around asyncio event loop
+    loop = tornado.ioloop.IOLoop.current()
+
+    application = tornado.web.Application(
+        [(r"/", MainHandler)], debug=True
+    )
+    application.listen(8888)
 
     try:
         logger.info("Open a web browser to http://localhost:8888 "
                     "to see the Transit Status Page")
         for consumer in consumers:
-            tornado.ioloop.IOLoop.current().spawn_callback(consumer.consume)
-
-        tornado.ioloop.IOLoop.current().start()
-    except KeyboardInterrupt as e:
+            loop.add_callback(consumer.consume)
+        loop.start()
+    except KeyboardInterrupt:
         logger.info("Shutting down server ...")
-        tornado.ioloop.IOLoop.current().stop()
+        loop.stop()
         for consumer in consumers:
             consumer.close()

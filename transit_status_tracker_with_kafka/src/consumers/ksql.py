@@ -23,7 +23,8 @@ DROP TABLE IF EXISTS TURNSTILE;
 DROP TABLE IF EXISTS {turnstile_table} DELETE TOPIC;
 
 CREATE TABLE TURNSTILE (
-    station_id INTEGER
+    station_id INTEGER,
+    line VARCHAR
 ) WITH (
     KAFKA_TOPIC='{topic}',
     VALUE_FORMAT='AVRO',
@@ -34,9 +35,9 @@ CREATE TABLE {turnstile_table}
 WITH (
     VALUE_FORMAT='JSON'
 ) AS
-    SELECT COUNT(*) AS count
+    SELECT line, station_id, COUNT(*) AS count
     FROM TURNSTILE
-    GROUP BY station_id;
+    GROUP BY line, station_id;
 """)
 
 

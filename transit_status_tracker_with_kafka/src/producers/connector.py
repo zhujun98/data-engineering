@@ -70,7 +70,7 @@ class PostgresConnector:
                    "incrementing.column.name": "stop_id",
                    "topic.prefix": self._topic_prefix,
                    # In practice it can be as high as one hour.
-                   "poll.interval.ms": "10000",
+                   "poll.interval.ms": "60000",
                }
            }),
         )

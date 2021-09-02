@@ -1,8 +1,6 @@
 """Defines core consumer functionality"""
-import confluent_kafka
 from confluent_kafka import Consumer, OFFSET_BEGINNING
 from confluent_kafka.avro import AvroConsumer, CachedSchemaRegistryClient
-from confluent_kafka.avro.serializer import SerializerError
 from tornado import gen
 
 from ..config import config
@@ -14,7 +12,7 @@ class KafkaConsumer:
                  topic_name_pattern,
                  message_handler,
                  is_avro=True,
-                 offset_earliest=False):
+                 offset_earliest=True):
         """Creates a consumer object for asynchronous use"""
         self._topic_name_pattern = topic_name_pattern
         self._message_handler = message_handler
@@ -48,24 +46,20 @@ class KafkaConsumer:
         logger.info("Partitions assigned for %s", self._topic_name_pattern)
 
     async def consume(self):
-        """Asynchronously consumes data from kafka topic."""
+        # TODO: Improve
         while True:
-            num_results = 1
-            while num_results > 0:
-                num_results = self._consume()
-            await gen.sleep(1.0)
+            while True:
+                message = self._consumer.poll(self._time_interval)
+                if message is None:
+                    logger.debug("No message received by consumer")
+                    break
+                elif message.error() is not None:
+                    logger.error("Error from consumer: %s", message.error())
+                    break
+                else:
+                    self._message_handler(message)
 
-    def _consume(self):
-        """Polls for a message. Returns 1 if a message was received, 0 otherwise"""
-        message = self._consumer.poll(self._time_interval)
-        if message is None:
-            logger.debug("No message received by consumer")
-            return 0
-        if message.error() is not None:
-            logger.error("Error from consumer: %s", message.error())
-            return 0
-        self._message_handler(message)
-        return 1
+            await gen.sleep(self._time_interval)
 
     def close(self):
         """Close down and terminate the held Kafka consumer."""

@@ -11,7 +11,7 @@
           <b>Welcome to the CTA Status Page!</b>
         </div>
         <div>
-          {{ int(weather.temperature) }}° | {{ weather.status.title().replace("_", " ") }}
+          {{ int(weather.temperature) }}° | {{ weather.status }}
         </div>
       </div>
       <div class="row" style="margin: 0px 20px 0px 20px">
@@ -26,14 +26,14 @@
             </tr>
           </thead>
           <tbody>
-            {% for color, line in (("blue", lines.blue_line), ("green", lines.green_line), ("red", lines.red_line)) %}
+            {% for color, line in lines.items() %}
             {% for station in sorted(line.stations.values(), key=lambda x: x.order) %}
             <tr>
               <td style="background-color: {{ line.color_code }}">    </td>
-              <td>{{ station.station_name }}</td>
-              <td>{{ station.dir_a["train_id"] if station.dir_a is not None else "---" }}</td>
-              <td>{{ station.dir_b["train_id"] if station.dir_b is not None else "---" }}</td>
-              <td>{{ station.num_turnstile_entries }}</td>
+              <td>{{ station.name }}</td>
+              <td>{{ station.direction_a.id if station.direction_a is not None else "---" }}</td>
+              <td>{{ station.direction_b.id if station.direction_b is not None else "---" }}</td>
+              <td>{{ station.turnstile_entries }}</td>
             </tr>
             {% end %}
             {% end %}
