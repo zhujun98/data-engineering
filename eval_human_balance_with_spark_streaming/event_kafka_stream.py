@@ -18,20 +18,26 @@ if __name__ == "__main__":
         .option("startingOffsets", "earliest")\
         .load()
 
-    schema = StructType([
+    customerRiskSchema = StructType([
         StructField("customer", StringType()),
         StructField("score", FloatType()),
         StructField("riskDate", DateType())
     ])
 
+    # Create a view with fields similar as follows
+    # +------------+-----+-----------+
+    # |    customer|score| riskDate  |
+    # +------------+-----+-----------+
+    # |"sam@tes"...| -1.4| 2020-09...|
+    # +------------+-----+-----------+
     kafkaRawStreamingDF\
         .selectExpr("cast(value as string) value")\
-        .withColumn("value", F.from_json(F.col("value"), schema))\
+        .withColumn("value", F.from_json(F.col("value"), customerRiskSchema))\
         .select(F.col("value.*"))\
         .createOrReplaceTempView("CustomerRisk")
 
     customerRiskStreamingDF = spark\
-        .sql("select customer, score from CustomerRisk")
+        .sql("SELECT customer, score FROM CustomerRisk")
 
     customerRiskStreamingDF\
         .writeStream\
@@ -39,3 +45,12 @@ if __name__ == "__main__":
         .format("console")\
         .start()\
         .awaitTermination()
+
+# The output should look like this:
+# +--------------------+-----+
+# |            customer|score|
+# +--------------------+-----+
+# |Danny.Gonzalez@te...| 11.5|
+# |Trevor.Huey@test.com|-11.0|
+# |Frank.Spencer@tes...| 16.0|
+# ...
