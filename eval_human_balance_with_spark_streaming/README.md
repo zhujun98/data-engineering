@@ -114,20 +114,8 @@ value as a JSON object with this format:
 }
 ```
 
-- Save the Spark startup logs for submission with your solution using the commands below:
+There are three Spark Python script:
 
-```
-docker logs spark-master >& ../../spark/logs/spark-master.log
-
-docker logs spark-worker >& ../../spark/logs/spark-master.log >& ../../spark/logs/spark-worker.log
-```
-
-
-
-![Toggle Switch](images/toggle_simulation.png)
-
-You are going to write 3 Spark Python scripts. Each will connect to a kafka 
-broker running at `kafka:19092` :
 - Write one spark script [](redis_kafka_stream.py) to subscribe to the 
   `redis-server` topic, base64 decode the payload, and deserialize the JSON 
   to individual fields, then print the fields to the console. The data should 
@@ -140,19 +128,4 @@ broker running at `kafka:19092` :
   output to the newly created kafka topic you configured for STEDI to subscribe 
   to that contains at least the fields below:
 
-```json
-{"customer":"Santosh.Fibonnaci@test.com",
- "score":"28.5",
- "email":"Santosh.Fibonnaci@test.com",
- "birthYear":"1963"
-} 
-```
-
-- From a new terminal type: `submit-kafka-join.sh` to submit to the cluster
-
-- Once the data is populated in the configured kafka topic, the graph should have real-time data points
-
-![Populated Graph](images/populated_graph.png)
-
-- Upload at least two screenshots of the working graph to the screenshots workspace folder 
-
+Once the data is populated in the configured kafka topic, the graph should have real-time data points
