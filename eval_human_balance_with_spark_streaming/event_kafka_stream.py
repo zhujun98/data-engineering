@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col, unbase64, base64, split
 from pyspark.sql.types import StructField, StructType, StringType, BooleanType, ArrayType, DateType
 
+
 # TO-DO: using the spark application object, read a streaming dataframe from the Kafka topic stedi-events as the source
 # Be sure to specify the option that reads all the events from the topic including those that were published before you started the spark stream
                                    

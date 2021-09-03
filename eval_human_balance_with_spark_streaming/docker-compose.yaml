@@ -4,7 +4,7 @@
 # * 1-node kafka cluster
 # * 1-zookeeper ensemble
 # * Kafka connect with Redis Source
-# * 3 Java applications- trucking-Simulation, banking-Simulation, and stedi
+# * 1 Java application stedi
 # * Spark master
 # * Spark worker
 
@@ -40,30 +40,6 @@ services:
     depends_on:
       - "zookeeper"
 
-  banking-simulation:
-    image: gcr.io/simulation-images/banking-simulation
-    container_name: banking-simulation
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_DB: 0
-      KAFKA_BROKER: kafka:19092
-    depends_on:
-      - "kafka"
-      - "redis"
-
-  trucking-simulation:
-    image: gcr.io/simulation-images/trucking-simulation
-    container_name: trucking-simulation
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_DB: 0
-      KAFKA_BROKER: kafka:19092
-    depends_on:
-      - "kafka"
-      - "redis"
-
   stedi:
     image: gcr.io/simulation-images/stedi
     container_name: stedi
@@ -74,7 +50,7 @@ services:
       REDIS_PORT: 6379
       REDIS_DB: 0
       KAFKA_BROKER: kafka:19092
-      KAFKA_RISK_TOPIC: your-topic-here
+      KAFKA_RISK_TOPIC: stedi-events
     depends_on:
       - "kafka"
       - "redis"
