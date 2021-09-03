@@ -5,24 +5,20 @@ from pyspark.sql.types import (
 )
 
 
-if __name__ == "__main__":
+def event_kafka_stream(sp):
+    customerRiskSchema = StructType([
+        StructField("customer", StringType()),
+        StructField("score", FloatType()),
+        StructField("riskDate", DateType())
+    ])
 
-    spark = SparkSession.builder.appName("event-kafka-stream").getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
-
-    kafkaRawStreamingDF = spark\
+    kafkaRawStreamingDF = sp\
         .readStream\
         .format("kafka")\
         .option("kafka.bootstrap.servers", "kafka:19092")\
         .option("subscribe", "stedi-events")\
         .option("startingOffsets", "earliest")\
         .load()
-
-    customerRiskSchema = StructType([
-        StructField("customer", StringType()),
-        StructField("score", FloatType()),
-        StructField("riskDate", DateType())
-    ])
 
     # Create a view with fields similar as follows
     # +------------+-----+-----------+
@@ -36,14 +32,23 @@ if __name__ == "__main__":
         .select(F.col("value.*"))\
         .createOrReplaceTempView("CustomerRisk")
 
-    customerRiskStreamingDF = spark\
+    customerRiskStreamingDF = sp\
         .sql("SELECT customer, score FROM CustomerRisk")
 
-    customerRiskStreamingDF\
-        .writeStream\
-        .outputMode("append")\
-        .format("console")\
-        .start()\
+    return customerRiskStreamingDF
+
+
+if __name__ == "__main__":
+    spark = SparkSession.builder.appName("event-kafka-stream").getOrCreate()
+    spark.sparkContext.setLogLevel("WARN")
+
+    customerRiskStreamingDF = event_kafka_stream(spark)
+
+    customerRiskStreamingDF \
+        .writeStream \
+        .outputMode("append") \
+        .format("console") \
+        .start() \
         .awaitTermination()
 
 # The output should look like this:

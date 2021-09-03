@@ -6,8 +6,7 @@ from pyspark.sql.types import (
 )
 
 
-if __name__ == "__main__":
-
+def redis_kafka_stream(sp):
     # Note: The Redis Source for Kafka has redundant fields zSetEntries and
     # zsetentries, only one should be parsed.
     redisServerTopicSchema = StructType([
@@ -30,16 +29,7 @@ if __name__ == "__main__":
         StructField("birthDay", DateType())
     ])
 
-    customerRiskSchema = StructType([
-        StructField("customer", StringType()),
-        StructField("score", FloatType()),
-        StructField("riskDate", DateType())
-    ])
-
-    spark = SparkSession.builder.appName("redis-kafka-stream").getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
-
-    kafkaRawStreamingDF = spark\
+    kafkaRawStreamingDF = sp\
         .readStream\
         .format("kafka")\
         .option("kafka.bootstrap.servers", "kafka:19092")\
@@ -73,14 +63,14 @@ if __name__ == "__main__":
     # The reason we do it this way is that the syntax available select against
     # a view is different than a dataframe, and it makes it easy to select the
     # nth element of an array in a sql column.
-    spark.sql(
+    sp.sql(
         "SELECT key, zSetEntries[0].element AS encodedCustomer FROM RedisSortedSet")\
         .withColumn("customer", F.unbase64(F.col("encodedCustomer")).cast(StringType()))\
         .withColumn("customer", F.from_json(F.col("customer"), customerSchema))\
         .select(F.col("customer.*"))\
         .createOrReplaceTempView("CustomerRecords")
 
-    emailAndBirthYearStreamingDF = spark.sql(
+    emailAndBirthYearStreamingDF = sp.sql(
         """
         SELECT email, birthDay FROM CustomerRecords
         WHERE email IS NOT NULL AND birthDay IS NOT NULL
@@ -88,11 +78,20 @@ if __name__ == "__main__":
         ).withColumn("birthYear", F.split(F.col("birthDay"), "-").getItem(0))\
         .select(F.col("email"), F.col("birthYear"))
 
-    emailAndBirthYearStreamingDF\
-        .writeStream\
-        .outputMode("append")\
-        .format("console")\
-        .start()\
+    return emailAndBirthYearStreamingDF
+
+
+if __name__ == "__main__":
+    spark = SparkSession.builder.appName("redis-kafka-stream").getOrCreate()
+    spark.sparkContext.setLogLevel("WARN")
+
+    emailAndBirthYearStreamingDF = redis_kafka_stream(spark)
+
+    emailAndBirthYearStreamingDF \
+        .writeStream \
+        .outputMode("append") \
+        .format("console") \
+        .start() \
         .awaitTermination()
 
 # The output should look like this:
