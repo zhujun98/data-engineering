@@ -9,7 +9,7 @@ In this application, the user starts a timer and clicks a button with each step
 he/she takes. The test is finished when 30 steps are reached. The data 
 collected enables the application to monitor the balance risk of the user. 
 
-![Project Architecture](./architecture.jpg)
+<img src="./architecture.jpg" alt="drawing" width="540"/>
 
 Redis is configured as a Kafka source. Whenever any data is saved to Redis, 
 the message will be published to the Kafka topic called `redis-server`. After a 
@@ -21,8 +21,6 @@ transmitted to a Kafka topic called `stedi-events`.
 ```
 docker-compose up
 ```
-
-### Check Kafka status
 
 List the existing Kafka topics by
 
@@ -39,7 +37,29 @@ redis-server
 stedi-events
 ```
 
-### Check Redis status
+## How to use STEDI
+
+- Log in to the STEDI application: http://localhost:4567.
+
+### Automatic data generation
+
+- From the timer page, use the toggle button in the upper right corner to 
+  activate simulated user data. One can create additional customers for by
+  toggling off and on the button. Each time you activate it, STEDI creates 
+  30 new customers, and then starts generating the risk scores for each one. 
+  It takes about 4 minutes for each customer to have the risk scores generated, 
+  however customer data is generated and published to Redis immediately.
+
+### Manual data generation (to be verified)
+
+- Click Create New Customer, create a test customer and submit.
+- Click start, then add steps until you reach 30 and the timer has stopped.
+- Repeat this three times, and you will receive a risk score.
+
+
+## Monitor data
+
+### Redis
 
 Start the Redis CLI tool by
 
@@ -49,51 +69,28 @@ docker exec -it redis redis-cli
 
 List the existing keys by
 ```sh
-127.0.0.1:6379> keys **
+keys **
 ```
 
 The following keys are already in Redis:
 ```sh
-1) "Customer"
-2) "User"
+1) "LoginToken"
+2) "Customer"
+3) "RapidStepTest"
+4) "User"
 ```
 
-## How to use
+The types for all the keys are `zset`. One can check the data, for example, by
+```
+zrange RapidStepTest 0 -1
+```
 
-- Log in to the STEDI application: http://localhost:4567.
-
-### Automatic data generation
-
-- From the timer page, use the toggle button in the upper right corner to 
-  activate simulated user data to see real-time customer and risk score data. 
-  Toggle off and on to create additional customers for redis events. Each 
-  time you activate it, STEDI creates 30 new customers, and then starts 
-  generating risk scores for each one. It takes 4 minutes for each customer to 
-  have risk scores generated, however customer data is generated immediately.
-
-### Manual data generation (to be verified)
-
-- Click Create New Customer, create a test customer and submit
-
-- Click start, then add steps until you reach 30 and the timer has stopped
-
-- Repeat this three times, and you will receive a risk score
-
-
-## Analyse data
-
-### Monitor data
+### STEDI
 
 Monitor the progress of data generation in STEDI by
 
 ```
 docker logs -f stedi
-```
-
-The types of both "Customer" and "User" in Redis are `zset`. One can list the 
-data by
-```
-zrange Customer 0 -1
 ```
 
 Perform EDA on the two Kafka topics separately by
@@ -103,7 +100,7 @@ bash submit-event-kafka-stream.sh
 bash submit-redis-kafka-stream.sh
 ```
 
-### Run data processing pipeline
+## Process data
 
 ```
 bash submit-kafka-join.sh
