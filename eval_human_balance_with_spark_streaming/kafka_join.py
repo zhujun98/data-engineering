@@ -35,7 +35,7 @@ if __name__ == "__main__":
         .writeStream\
         .format("kafka") \
         .option("kafka.bootstrap.servers", "kafka:19092")\
-        .option("topic", "customer-score")\
+        .option("topic", "customer-risk")\
         .option("checkpointLocation", "/tmp/kafkacheckpoint")\
         .start()\
         .awaitTermination()
