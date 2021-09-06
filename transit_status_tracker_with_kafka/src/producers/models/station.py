@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from confluent_kafka import avro
@@ -45,37 +46,46 @@ class Station(Producer):
 
     async def run(self):
         """Override."""
-        await self._turnstile.run()
+        loop = asyncio.get_event_loop()
+        loop.create_task(self._turnstile.run())
 
         if self._a_arriving is not None:
             if self.a_station is not None:
-                self.set_a_train(*self._a_arriving)
+                await self.set_a_train(*self._a_arriving)
             else:
                 # The direction of the train flips at the end of the line.
-                self.set_b_train(*self._a_arriving)
+                await self.set_b_train(*self._a_arriving)
             self._a_arriving = None
 
         if self._b_arriving is not None:
             if self.b_station is not None:
-                self.set_b_train(*self._b_arriving)
+                await self.set_b_train(*self._b_arriving)
             else:
                 # end of line
-                self.set_a_train(*self._b_arriving)
+                await self.set_a_train(*self._b_arriving)
             self._b_arriving = None
 
-    def set_a_train(self, train, prev_station_id=None, prev_direction=None):
+    async def set_a_train(self, train,
+                          prev_station_id=None,
+                          prev_direction=None):
         """Register a train that will travel to the a direction."""
         self._a_train = train
-        self._produce_message(train.train_id, "a", train.status.name,
-                              prev_station_id, prev_direction)
+        asyncio.get_event_loop().run_in_executor(
+            None, self._produce_message,
+            train.train_id, "a", train.status.name, prev_station_id,
+            prev_direction)
         logger.debug(
             f"{self._name} -> {self.a_station._name}: {train.train_id}")
 
-    def set_b_train(self, train, prev_station_id=None, prev_direction=None):
+    async def set_b_train(self,
+                          train, prev_station_id=None,
+                          prev_direction=None):
         """Register a train that will travel to the b direction."""
         self._b_train = train
-        self._produce_message(train.train_id, "b", train.status.name,
-                              prev_station_id, prev_direction)
+        asyncio.get_event_loop().run_in_executor(
+            None, self._produce_message,
+            train.train_id, "b", train.status.name, prev_station_id,
+            prev_direction)
         logger.debug(
             f"{self._name} -> {self.b_station._name}: {train.train_id}")
 

@@ -6,7 +6,7 @@ import pandas as pd
 from ..config import config
 from .connector import PostgresConnector
 from .logger import logger
-from .models import CTALine, Weather
+from .models import CTALine, Weather, timer
 
 
 class StreamSimulation:
@@ -23,8 +23,10 @@ class StreamSimulation:
         # simulated train and turnstile data via AvroProducer
         if num_trains is None:
             num_trains = int(config["PARAM"]["NUM_TRAINS"])
-        self._cta_lines = [CTALine(c, self._raw_df, num_trains=num_trains)
-                           for c in ('blue', 'red', 'green')]
+        self._cta_lines = [
+            CTALine(c, self._raw_df, num_trains=num_trains)
+            for c in ('blue', 'red', 'green')
+        ]
 
         # simulated weather data via REST proxy
         self._weather_station = Weather()
@@ -35,13 +37,16 @@ class StreamSimulation:
     def start(self):
         logger.info("Beginning simulation, press Ctrl+C to exit at any time")
 
+        self._connector.start()
+
         try:
-            asyncio.run(asyncio.wait(
-                [self._connector.run(),
-                 self._weather_station.run(),
-                 *[line.run() for line in self._cta_lines]]
-            ))
+            asyncio.run(asyncio.wait([
+                timer.run(),
+                self._weather_station.run(),
+                *[line.run() for line in self._cta_lines]
+            ]))
         except KeyboardInterrupt:
             logger.info("Shutting down ...")
+            self._weather_station.close()
             for line in self._cta_lines:
                 line.close()

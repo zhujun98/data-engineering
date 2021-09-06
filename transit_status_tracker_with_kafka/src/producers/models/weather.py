@@ -2,7 +2,6 @@ import asyncio
 from enum import IntEnum
 import json
 from pathlib import Path
-import datetime
 import random
 
 import requests
@@ -10,6 +9,7 @@ import requests
 from ...config import config
 from ..logger import logger
 from .producer import Producer
+from .timer import timer
 
 
 class Weather(Producer):
@@ -42,10 +42,10 @@ class Weather(Producer):
 
         self._initialized = False
         self._time_interval = float(
-            config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL'])
+            config['PARAM']['TIMER_UPDATE_TIME_INTERVAL'])
 
     def _update_status(self):
-        month = datetime.datetime.now().month
+        month = timer.month
         if not self._initialized:
             if month in self.winter_months:
                 self._temp = 40.0
@@ -71,10 +71,10 @@ class Weather(Producer):
 
     async def run(self):
         """Override."""
+        rest_proxy_url = config['KAFKA']['REST_PROXY_URL']
         while True:
             self._update_status()
-
-            rest_proxy_url = config['KAFKA']['REST_PROXY_URL']
+            # TODO: run_in_executor
             r = requests.post(
                f"{rest_proxy_url}/topics/{self._topic_name}",
                headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},

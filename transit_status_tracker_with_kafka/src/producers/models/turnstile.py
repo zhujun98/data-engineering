@@ -9,6 +9,7 @@ from confluent_kafka import avro
 from ...config import config
 from ..logger import logger
 from .producer import Producer
+from .timer import timer
 
 
 class Turnstile(Producer):
@@ -39,31 +40,26 @@ class Turnstile(Producer):
         self._station_id = station_id
         self._color = color
 
-        self.metrics_df = self.seed_df[self.seed_df["station_id"] == station_id]
+        self._metrics_df = self.seed_df[
+            self.seed_df["station_id"] == station_id]
         self._weekday_ridership = int(
-            round(self.metrics_df.iloc[0]["avg_weekday_rides"])
+            round(self._metrics_df.iloc[0]["avg_weekday_rides"])
         )
         self._saturday_ridership = int(
-            round(self.metrics_df.iloc[0]["avg_saturday_rides"])
+            round(self._metrics_df.iloc[0]["avg_saturday_rides"])
         )
         self._sunday_ridership = int(
-            round(self.metrics_df.iloc[0]["avg_sunday-holiday_rides"])
+            round(self._metrics_df.iloc[0]["avg_sunday-holiday_rides"])
         )
-
-        self._time_interval = float(
-            config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL'])
 
     def _get_entries(self):
         """Returns the number of turnstile entries for the given timeframe."""
-        curr_datetime = datetime.datetime.utcnow()
-        time_step = datetime.timedelta(
-            float(config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL']))
+        # FIXME
+        time_step = datetime.timedelta(5.)
 
-        hour_curve = self.curve_df[self.curve_df["hour"] == curr_datetime.hour]
-        ratio = hour_curve.iloc[0]["ridership_ratio"]
         total_steps = int(60 / (60 / time_step.total_seconds()))
 
-        dow = curr_datetime.weekday()
+        dow = timer.weekday
         if dow >= 0 or dow < 5:
             num_riders = self._weekday_ridership
         elif dow == 6:
@@ -72,6 +68,8 @@ class Turnstile(Producer):
             num_riders = self._sunday_ridership
 
         # Calculate approximation of number of entries for this simulation step
+        hour_curve = self.curve_df[self.curve_df["hour"] == timer.hour]
+        ratio = hour_curve.iloc[0]["ridership_ratio"]
         num_entries = int(math.floor(num_riders * ratio / total_steps))
         # Introduce some randomness in the data
         return max(num_entries + random.choice(range(-5, 5)), 0)

@@ -2,12 +2,11 @@ import asyncio
 from pandas import DataFrame
 
 from ...config import config
-from .producer import Producer
 from .station import Station
 from .train import Train
 
 
-class CTALine(Producer):
+class CTALine:
     """Chicago Transit Authority (CTA) 'L' (Train) system."""
 
     _colors = frozenset(['red', 'blue', 'green'])
@@ -16,7 +15,6 @@ class CTALine(Producer):
         self._color = color.lower()
         if self._color not in self._colors:
             raise ValueError(f"CTALine color must be one of: {self._colors}")
-        super().__init__(config["TOPIC"]["LINE"], None, None)
 
         self._stations = self._initialize_line(station_df)
 
@@ -24,10 +22,7 @@ class CTALine(Producer):
             raise ValueError("Too many trains!")
         self._num_trains = num_trains
 
-        self._initialize_trains()
-
-        self._time_interval = float(
-            config['PARAM']['PRODUCER_PRODUCE_TIME_INTERVAL'])
+        self._time_interval = float(config['PARAM']['CTA_LINE_UPDATE_INTERVAL'])
 
     def _initialize_line(self, station_df: DataFrame):
         """Initialize stations on the line."""
@@ -49,7 +44,7 @@ class CTALine(Producer):
             line.append(curr_station)
         return line
 
-    def _initialize_trains(self):
+    async def _initialize_trains(self):
         """Initialize trains for stations."""
         # Evenly distribute the trains at initialization.
         n_stops = len(self._stations) - 1
@@ -68,19 +63,21 @@ class CTALine(Producer):
                 b_dir = True
 
             if b_dir:
-                self._stations[loc].set_b_train(train)
+                await self._stations[loc].set_b_train(train)
                 loc += step_size
             else:
-                self._stations[loc].set_a_train(train)
+                await self._stations[loc].set_a_train(train)
                 loc -= step_size
 
     async def run(self):
         """Override."""
+        await self._initialize_trains()
+
         while True:
             for station in self._stations:
                 station.advance()
-            for station in self._stations:
-                await station.run()
+
+            await asyncio.wait([station.run() for station in self._stations])
 
             await asyncio.sleep(self._time_interval)
 
