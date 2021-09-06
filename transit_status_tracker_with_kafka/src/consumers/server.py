@@ -78,6 +78,13 @@ def process_arrival(msg):
     line = value["line"]
 
     try:
+        # handle departure
+        prev_station = lines[line].stations[value["prev_station_id"]]
+        if value["prev_direction"] == "a":
+            prev_station.direction_a = None
+        else:
+            prev_station.direction_b = None
+
         # handle arrival
         station = lines[line].stations[value["station_id"]]
         train = Train(value["train_id"], value["train_status"])
@@ -85,13 +92,6 @@ def process_arrival(msg):
             station.direction_a = train
         else:
             station.direction_b = train
-
-        # handle departure
-        prev_station = lines[line].stations[value["prev_station_id"]]
-        if value["prev_direction"] == "a":
-            prev_station.direction_a = None
-        else:
-            prev_station.direction_b = None
     except KeyError:
         pass
 
@@ -152,7 +152,7 @@ def run_server():
         logger.info("Open a web browser to http://localhost:8888 "
                     "to see the Transit Status Page")
         for consumer in consumers:
-            loop.add_callback(consumer.consume)
+            loop.add_callback(consumer.run)
         loop.start()
     except KeyboardInterrupt:
         logger.info("Shutting down server ...")

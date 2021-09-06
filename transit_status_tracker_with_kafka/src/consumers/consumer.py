@@ -1,7 +1,8 @@
 """Defines core consumer functionality"""
+import asyncio
+
 from confluent_kafka import Consumer, OFFSET_BEGINNING
 from confluent_kafka.avro import AvroConsumer, CachedSchemaRegistryClient
-from tornado import gen
 
 from ..config import config
 from .logger import logger
@@ -17,9 +18,6 @@ class KafkaConsumer:
         self._topic_name_pattern = topic_name_pattern
         self._message_handler = message_handler
         self._offset_earliest = offset_earliest
-
-        self._time_interval = float(
-            config["PARAM"]["CONSUMER_POLL_TIME_INTERVAL"])
 
         conf = {
             "bootstrap.servers": config["KAFKA"]["BROKER_URL"],
@@ -45,21 +43,18 @@ class KafkaConsumer:
 
         logger.info("Partitions assigned for %s", self._topic_name_pattern)
 
-    async def consume(self):
-        # TODO: Improve
+    async def run(self):
+        loop = asyncio.get_running_loop()
         while True:
-            while True:
-                message = self._consumer.poll(self._time_interval)
-                if message is None:
-                    logger.debug("No message received by consumer")
-                    break
-                elif message.error() is not None:
-                    logger.error("Error from consumer: %s", message.error())
-                    break
-                else:
-                    self._message_handler(message)
-
-            await gen.sleep(self._time_interval)
+            message = await loop.run_in_executor(None, self._consumer.poll)
+            if message is None:
+                logger.debug("No message received by consumer")
+                break
+            elif message.error() is not None:
+                logger.error("Error from consumer: %s", message.error())
+                break
+            else:
+                self._message_handler(message)
 
     def close(self):
         """Close down and terminate the held Kafka consumer."""
