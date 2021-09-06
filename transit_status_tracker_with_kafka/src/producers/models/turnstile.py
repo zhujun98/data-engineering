@@ -52,13 +52,12 @@ class Turnstile(Producer):
             round(self._metrics_df.iloc[0]["avg_sunday-holiday_rides"])
         )
 
+        self._steps_per_hour = \
+            float(config['PARAM']['CTA_LINE_UPDATE_INTERVAL']) /\
+            float(config['PARAM']['TIMER_UPDATE_TIME_INTERVAL'])
+
     def _get_entries(self):
-        """Returns the number of turnstile entries for the given timeframe."""
-        # FIXME
-        time_step = datetime.timedelta(5.)
-
-        total_steps = int(60 / (60 / time_step.total_seconds()))
-
+        """Returns the number of turnstile entries."""
         dow = timer.weekday
         if dow >= 0 or dow < 5:
             num_riders = self._weekday_ridership
@@ -67,12 +66,13 @@ class Turnstile(Producer):
         else:
             num_riders = self._sunday_ridership
 
-        # Calculate approximation of number of entries for this simulation step
         hour_curve = self.curve_df[self.curve_df["hour"] == timer.hour]
-        ratio = hour_curve.iloc[0]["ridership_ratio"]
-        num_entries = int(math.floor(num_riders * ratio / total_steps))
+        hour_ratio = hour_curve.iloc[0]["ridership_ratio"]
+
+        num_entries = num_riders * hour_ratio / self._steps_per_hour
         # Introduce some randomness in the data
-        return max(num_entries + random.choice(range(-5, 5)), 0)
+        num_entries *= random.uniform(0.8, 1.2)
+        return int(num_entries)
 
     async def run(self):
         """Override."""

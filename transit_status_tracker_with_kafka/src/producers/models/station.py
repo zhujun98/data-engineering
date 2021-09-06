@@ -46,8 +46,7 @@ class Station(Producer):
 
     async def run(self):
         """Override."""
-        loop = asyncio.get_event_loop()
-        loop.create_task(self._turnstile.run())
+        await self._turnstile.run()
 
         if self._a_arriving is not None:
             if self.a_station is not None:
