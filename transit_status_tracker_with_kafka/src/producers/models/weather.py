@@ -28,8 +28,8 @@ class Weather(Producer):
     with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as fp:
         value_schema = json.dumps(json.load(fp))
 
-    winter_months = {0, 1, 2, 3, 10, 11}
-    summer_months = {6, 7, 8}
+    _avg_monthly_temp = [25.2, 26.4, 34.8, 46.0, 58.1, 69.2,
+                         74.8, 73.7, 67.3, 54.8, 42.6, 31.1]
 
     def __init__(self):
         topic_name = config["TOPIC"]["WEATHER"]
@@ -40,33 +40,11 @@ class Weather(Producer):
         self._status = None
         self._temp = None
 
-        self._initialized = False
         self._time_interval = float(
             config['PARAM']['TIMER_UPDATE_TIME_INTERVAL'])
 
     def _update_status(self):
-        month = timer.month
-        if not self._initialized:
-            if month in self.winter_months:
-                self._temp = 40.0
-            elif month in self.summer_months:
-                self._temp = 85.0
-            else:
-                self._temp = 70.0
-
-            self._status = random.choice(list(self.Status))
-
-            self._initialized = True
-
-        # This algorithm is from the original code ...
-        mode = 0.0
-        if month in self.winter_months:
-            mode = -1.0
-        elif month in self.summer_months:
-            mode = 1.0
-        self._temp += min(max(-20.0, random.triangular(-10.0, 10.0, mode)),
-                          100.0)
-
+        self._temp = self._avg_monthly_temp[timer.month] + random.uniform(-3, 3)
         self._status = random.choice(list(self.Status))
 
     async def run(self):
