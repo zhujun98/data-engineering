@@ -1,0 +1,37 @@
+[38;5;6m [38;5;5m20:32:55.81 [0m
+[38;5;6m [38;5;5m20:32:55.81 [0m[1mWelcome to the Bitnami spark container[0m
+[38;5;6m [38;5;5m20:32:55.82 [0mSubscribe to project updates by watching [1mhttps://github.com/bitnami/bitnami-docker-spark[0m
+[38;5;6m [38;5;5m20:32:55.82 [0mSubmit issues and feature requests at [1mhttps://github.com/bitnami/bitnami-docker-spark/issues[0m
+[38;5;6m [38;5;5m20:32:55.82 [0m
+[38;5;6m [38;5;5m20:32:55.83 [0m[38;5;2mINFO [0m ==> ** Starting Spark setup **
+[38;5;6m [38;5;5m20:32:55.88 [0m[38;5;2mINFO [0m ==> Generating Spark configuration file...
+
+[38;5;6m [38;5;5m20:32:55.90 [0m[38;5;2mINFO [0m ==> ** Spark setup finished! **
+[38;5;6m [38;5;5m20:32:55.93 [0m[38;5;2mINFO [0m ==> ** Starting Spark in worker mode **
+starting org.apache.spark.deploy.worker.Worker, logging to /opt/bitnami/spark/logs/spark--org.apache.spark.deploy.worker.Worker-1-9a11f6e5db98.out
+Spark Command: /opt/bitnami/java/bin/java -cp /opt/bitnami/spark/conf/:/opt/bitnami/spark/jars/* -Xmx1g org.apache.spark.deploy.worker.Worker --webui-port 8081 spark://spark:7077
+========================================
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+21/09/07 20:32:57 INFO Worker: Started daemon with process name: 38@9a11f6e5db98
+21/09/07 20:32:57 INFO SignalUtils: Registering signal handler for TERM
+21/09/07 20:32:57 INFO SignalUtils: Registering signal handler for HUP
+21/09/07 20:32:57 INFO SignalUtils: Registering signal handler for INT
+21/09/07 20:32:57 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+21/09/07 20:32:57 INFO SecurityManager: Changing view acls to: spark
+21/09/07 20:32:57 INFO SecurityManager: Changing modify acls to: spark
+21/09/07 20:32:57 INFO SecurityManager: Changing view acls groups to: 
+21/09/07 20:32:57 INFO SecurityManager: Changing modify acls groups to: 
+21/09/07 20:32:57 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(spark); groups with view permissions: Set(); users  with modify permissions: Set(spark); groups with modify permissions: Set()
+21/09/07 20:32:58 INFO Utils: Successfully started service 'sparkWorker' on port 43597.
+21/09/07 20:32:58 INFO Worker: Worker decommissioning not enabled, SIGPWR will result in exiting.
+21/09/07 20:32:58 INFO Worker: Starting Spark worker 172.28.0.2:43597 with 1 cores, 1024.0 MiB RAM
+21/09/07 20:32:58 INFO Worker: Running Spark version 3.1.2
+21/09/07 20:32:58 INFO Worker: Spark home: /opt/bitnami/spark
+21/09/07 20:32:58 INFO ResourceUtils: ==============================================================
+21/09/07 20:32:58 INFO ResourceUtils: No custom resources configured for spark.worker.
+21/09/07 20:32:58 INFO ResourceUtils: ==============================================================
+21/09/07 20:32:59 INFO Utils: Successfully started service 'WorkerUI' on port 8081.
+21/09/07 20:32:59 INFO WorkerWebUI: Bound WorkerWebUI to 0.0.0.0, and started at http://9a11f6e5db98:8081
+21/09/07 20:33:06 INFO Worker: Connecting to master spark:7077...
+21/09/07 20:33:06 INFO TransportClientFactory: Successfully created connection to spark/172.28.0.3:7077 after 29 ms (0 ms spent in bootstraps)
+21/09/07 20:33:06 INFO Worker: Successfully registered with master spark://8c00f84704b5:7077
