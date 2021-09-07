@@ -38,6 +38,6 @@ Jun Zhu
 
   ![](./transit_status_tracker_with_kafka/architecture.jpg)
 
-- [Evaluate Human Balance with Spark Streaming](./eval_human_balance_with_spark_streaming)
+- [STEDI app with Spark Streaming](./stedi_app_with_spark_streaming)
 
-  <img src="./eval_human_balance_with_spark_streaming/architecture.jpg" alt="drawing" width="540"/>
+  <img src="stedi_app_with_spark_streaming/architecture.jpg" alt="drawing" width="540"/>
