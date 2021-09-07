@@ -52,7 +52,7 @@ connect-status
 ## Start the data pipeline and the web server
 
 ```sh
-conda create -n dsnd python==3.7
+conda create -n dsnd python==3.7.5
 conda activate dsnd
 pip install -r requirements.txt
 ```
@@ -63,6 +63,9 @@ Start producers by:
 ```sh
 python start_simulation.py
 ```
+
+**Note**: You may need to increase the maximum number of opening 
+files by, for example, `ulimit -n 65536`)
 
 Start stream processing with Faust:
 ```sh
