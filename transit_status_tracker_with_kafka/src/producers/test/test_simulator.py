@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import patch
 
 import pytest
@@ -11,6 +12,10 @@ from ..simulation import StreamSimulation
 def test_cta_line(mocked_producer, num_trains):
     sim = StreamSimulation(num_trains=num_trains)
     lines = sim._cta_lines
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(asyncio.gather(
+        *[li._initialize_trains() for li in lines]))
 
     assert len(lines[0]._stations) == 32
     assert len(lines[1]._stations) == 34
@@ -28,9 +33,7 @@ def test_cta_line(mocked_producer, num_trains):
             assert line._stations[-3]._a_train is None
             assert line._stations[-3]._b_train.train_id == f"{line._color.capitalize()}L005"
 
-    for _ in range(3):
-        for line in lines:
-            line.run()
+    loop.run_until_complete(asyncio.gather(*[li.run(cycles=3) for li in lines]))
 
     # after advancing
     for i, line in enumerate(lines):

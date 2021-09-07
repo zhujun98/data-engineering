@@ -71,10 +71,11 @@ class CTALine:
                 await self._stations[loc].set_a_train(train)
                 loc -= step_size
 
-    async def run(self):
+    async def run(self, cycles=None):
         """Override."""
         await self._initialize_trains()
 
+        count = 1
         while True:
             for station in self._stations:
                 station.advance()
@@ -86,6 +87,11 @@ class CTALine:
             # The time consumption should be roughly self._time_interval.
             logger.info(f"Finished updating Line {self._color.capitalize()}: "
                         f"takes {time.time() - t0} s")
+
+            # for test
+            if cycles is not None and count == cycles:
+                break
+            count += 1
 
     def close(self):
         """Override."""
