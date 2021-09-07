@@ -34,6 +34,8 @@ class KafkaConsumer:
         self._consumer.subscribe(
             [self._topic_name_pattern], on_assign=self._on_assign)
 
+        self._timeout = float(config["PARAM"]["CONSUMER_POLL_TIMEOUT"])
+
     def _on_assign(self, consumer, partitions):
         """Callback to provide handling of customized offsets."""
         if self._offset_earliest:
@@ -46,7 +48,8 @@ class KafkaConsumer:
     async def run(self):
         loop = asyncio.get_running_loop()
         while True:
-            message = await loop.run_in_executor(None, self._consumer.poll)
+            message = await loop.run_in_executor(
+                None, self._consumer.poll, self._timeout)
             if message is None:
                 logger.debug("No message received by consumer")
             elif message.error() is not None:

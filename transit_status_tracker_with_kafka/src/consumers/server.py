@@ -154,9 +154,16 @@ def run_server():
                     "to see the Transit Status Page")
         for consumer in consumers:
             loop.add_callback(consumer.run)
+
         loop.start()
     except KeyboardInterrupt:
         logger.info("Shutting down server ...")
-        loop.stop()
+
+        # FIXME: how to shutdown everything elegantly?
+
         for consumer in consumers:
             consumer.close()
+        logger.info("Consumers closed!")
+
+        loop.stop()
+        logger.info("I/O loop stopped!")
