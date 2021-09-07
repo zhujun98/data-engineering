@@ -65,7 +65,7 @@ python start_simulation.py
 ```
 
 **Note**: You may need to increase the maximum number of opening 
-files by, for example, `ulimit -n 65536`)
+files in the current session by, for example, `ulimit -n 65536`)
 
 Start stream processing with Faust:
 ```sh
@@ -83,6 +83,8 @@ python start_server.py
 ```
 
 Open the browser to monitor the [CTA Transit Status](http://localhost:8888).
+
+![](./misc/screenshot.jpg)
 
 ## Debug the system
 
