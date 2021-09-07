@@ -40,7 +40,8 @@ class StreamSimulation:
         self._connector.start()
 
         try:
-            asyncio.run(asyncio.wait([
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(asyncio.gather(*[
                 timer.run(),
                 self._weather_station.run(),
                 *[line.run() for line in self._cta_lines]
