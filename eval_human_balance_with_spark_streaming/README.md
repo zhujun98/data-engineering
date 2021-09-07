@@ -119,5 +119,7 @@ bash submit-kafka-join.sh
 ```
 Check [log file](./spark/log/kafka_join.log).
 
-Once the data is populated in the configured kafka topic, the graph should have 
-real-time data points.
+Once the risk score data is populated in the configured kafka topic, the graph 
+should have real-time data points.
+
+![](./screenshots/risk_graph1.jpg)
