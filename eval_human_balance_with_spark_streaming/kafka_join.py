@@ -37,5 +37,4 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", "kafka:19092")\
         .option("topic", "customer-risk")\
         .option("checkpointLocation", "/tmp/kafkacheckpoint")\
-        .start()\
-        .awaitTermination()
+        .start()
