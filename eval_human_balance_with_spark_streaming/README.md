@@ -110,16 +110,17 @@ Check [log file](./spark/logs/event_stream.log).
 ```
 bash submit-redis-kafka-stream.sh
 ```
-Check [log file](./spark/log/redis_stream.log).
+Check [log file](./spark/logs/redis_stream.log).
 
 ## Process data
+
+Once the risk score data is populated in the configured kafka topic 
+`customer-risk`, submit the following job and the risk graph should 
+have real-time data points.
 
 ```
 bash submit-kafka-join.sh
 ```
-Check [log file](./spark/log/kafka_join.log).
-
-Once the risk score data is populated in the configured kafka topic, the graph 
-should have real-time data points.
+Check [log file](./spark/logs/kafka_join.log).
 
 ![](./screenshots/risk_graph1.jpg)
