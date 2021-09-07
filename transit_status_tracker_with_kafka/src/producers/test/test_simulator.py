@@ -17,8 +17,8 @@ def test_cta_line(mocked_producer, num_trains):
     loop.run_until_complete(asyncio.gather(
         *[li._initialize_trains() for li in lines]))
 
-    assert len(lines[0]._stations) == 32
-    assert len(lines[1]._stations) == 34
+    assert len(lines[0]._stations) == 33
+    assert len(lines[1]._stations) == 33
     assert len(lines[2]._stations) == 28
 
     # after initialization

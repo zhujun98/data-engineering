@@ -49,10 +49,8 @@ class KafkaConsumer:
             message = await loop.run_in_executor(None, self._consumer.poll)
             if message is None:
                 logger.debug("No message received by consumer")
-                break
             elif message.error() is not None:
                 logger.error("Error from consumer: %s", message.error())
-                break
             else:
                 self._message_handler(message)
 

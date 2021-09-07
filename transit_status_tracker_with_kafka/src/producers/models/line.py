@@ -29,16 +29,17 @@ class CTALine:
     def _initialize_line(self, station_df: DataFrame):
         """Initialize stations on the line."""
         stations_df = station_df[station_df[self._color.lower()]]
-        station_names = stations_df["station_name"].unique()
+        station_ids = stations_df["station_id"].unique()
 
         # build a doubly linked list
         line = []
         prev_station = None
-        for name in station_names:
-            station_data = station_df[station_df["station_name"] == name]
-            # int64 -> int
-            station_id = int(station_data["station_id"].unique()[0])
-            curr_station = Station(station_id, name, self._color)
+        for station_id in station_ids:
+            station_data = station_df[station_df["station_id"] == station_id]
+
+            name = station_data["station_name"].unique()[0]
+            # id: int64 -> int
+            curr_station = Station(int(station_id), name, self._color)
             curr_station.a_station = prev_station
             if prev_station is not None:
                 prev_station.b_station = curr_station
