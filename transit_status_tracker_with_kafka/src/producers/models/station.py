@@ -46,50 +46,49 @@ class Station(Producer):
 
     async def run(self):
         """Override."""
-        await self._turnstile.run()
+        tasks = list()
+        tasks.append(self._turnstile.run())
 
         if self._a_arriving is not None:
             if self.a_station is not None:
-                await self.set_a_train(*self._a_arriving)
+                tasks.append(self.set_a_train(*self._a_arriving))
             else:
                 # The direction of the train flips at the end of the line.
-                await self.set_b_train(*self._a_arriving)
+                tasks.append(self.set_b_train(*self._a_arriving))
             self._a_arriving = None
 
         if self._b_arriving is not None:
             if self.b_station is not None:
-                await self.set_b_train(*self._b_arriving)
+                tasks.append(self.set_b_train(*self._b_arriving))
             else:
                 # end of line
-                await self.set_a_train(*self._b_arriving)
+                tasks.append(self.set_a_train(*self._b_arriving))
             self._b_arriving = None
 
-    async def set_a_train(self, train,
-                          prev_station_id=None,
-                          prev_direction=None):
+        return asyncio.gather(*tasks)
+
+    def set_a_train(self, train, prev_station_id=None, prev_direction=None):
         """Register a train that will travel to the a direction."""
         self._a_train = train
-        asyncio.get_event_loop().run_in_executor(
-            None, self._produce_message,
-            train.train_id, "a", train.status.name, prev_station_id,
-            prev_direction)
+        task = self._produce_message(
+            train.train_id, "a", train.status.name,
+            prev_station_id, prev_direction)
         logger.debug(
             f"{self._name} -> {self.a_station._name}: {train.train_id}")
+        return task
 
-    async def set_b_train(self,
-                          train, prev_station_id=None,
-                          prev_direction=None):
+    def set_b_train(self, train, prev_station_id=None, prev_direction=None):
         """Register a train that will travel to the b direction."""
         self._b_train = train
-        asyncio.get_event_loop().run_in_executor(
-            None, self._produce_message,
-            train.train_id, "b", train.status.name, prev_station_id,
-            prev_direction)
+        task = self._produce_message(
+            train.train_id, "b", train.status.name,
+            prev_station_id, prev_direction)
         logger.debug(
             f"{self._name} -> {self.b_station._name}: {train.train_id}")
+        return task
 
-    def _produce_message(self, train_id, direction, status,
-                         prev_station_id, prev_direction):
+    async def _produce_message(self, train_id, direction, status,
+                               prev_station_id, prev_direction):
         self._producer.produce(
             topic=self._topic_name,
             key={"timestamp": self.time_millis()},

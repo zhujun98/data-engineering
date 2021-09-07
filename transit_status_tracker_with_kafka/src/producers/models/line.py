@@ -1,7 +1,9 @@
 import asyncio
 from pandas import DataFrame
+import time
 
 from ...config import config
+from ..logger import logger
 from .station import Station
 from .train import Train
 
@@ -77,9 +79,13 @@ class CTALine:
             for station in self._stations:
                 station.advance()
 
-            await asyncio.wait([station.run() for station in self._stations])
-
-            await asyncio.sleep(self._time_interval)
+            t0 = time.time()
+            await asyncio.gather(
+                asyncio.create_task(asyncio.sleep(self._time_interval)),
+                *[s.run() for s in self._stations])
+            # The time consumption should be roughly self._time_interval.
+            logger.info(f"Finished updating Line {self._color.capitalize()}: "
+                        f"takes {time.time() - t0} s")
 
     def close(self):
         """Override."""

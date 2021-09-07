@@ -75,7 +75,7 @@ class Weather(Producer):
             except Exception as e:
                 logger.error("Failed when posting weather data: %s", repr(e))
 
-            logger.debug("Update weather - temp: %s, status: %s",
-                         self._temp, self._status.name)
+            logger.info("Update weather - temp: %s, status: %s",
+                        self._temp, self._status.name)
 
             await asyncio.sleep(self._time_interval)

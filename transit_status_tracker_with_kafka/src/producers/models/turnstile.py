@@ -1,6 +1,5 @@
-import datetime
+import asyncio
 from pathlib import Path
-import math
 import random
 
 import pandas as pd
@@ -53,8 +52,8 @@ class Turnstile(Producer):
         )
 
         self._steps_per_hour = \
-            float(config['PARAM']['CTA_LINE_UPDATE_INTERVAL']) /\
-            float(config['PARAM']['TIMER_UPDATE_TIME_INTERVAL'])
+            float(config['PARAM']['TIMER_UPDATE_TIME_INTERVAL']) / \
+            float(config['PARAM']['CTA_LINE_UPDATE_INTERVAL'])
 
     def _get_entries(self):
         """Returns the number of turnstile entries."""
@@ -70,24 +69,29 @@ class Turnstile(Producer):
         hour_ratio = hour_curve.iloc[0]["ridership_ratio"]
 
         num_entries = num_riders * hour_ratio / self._steps_per_hour
-        # Introduce some randomness in the data
         num_entries *= random.uniform(0.8, 1.2)
         return int(num_entries)
+
+    async def _produce(self):
+        self._producer.produce(
+            topic=self._topic_name,
+            key={"timestamp": self.time_millis()},
+            key_schema=self._key_schema,
+            value={
+                "station_id": self._station_id,
+                "station_name": self._station_name,
+                "line": self._color
+            },
+            value_schema=self._value_schema
+        )
 
     async def run(self):
         """Override."""
         n_entries = self._get_entries()
-        for _ in range(n_entries):
-            self._producer.produce(
-                topic=self._topic_name,
-                key={"timestamp": self.time_millis()},
-                key_schema=self._key_schema,
-                value={
-                    "station_id": self._station_id,
-                    "station_name": self._station_name,
-                    "line": self._color
-                },
-                value_schema=self._value_schema
-            )
+        ret = asyncio.create_task(asyncio.sleep(0))
+        if n_entries > 0:
+            ret = asyncio.gather(*[asyncio.create_task(self._produce())
+                                 for _ in range(n_entries)])
 
-            logger.debug(f"{n_entries} entries in {self._station_name}")
+        logger.debug(f"{n_entries} entries in {self._station_name}")
+        return ret
