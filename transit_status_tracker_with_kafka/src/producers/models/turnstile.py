@@ -70,7 +70,7 @@ class Turnstile(Producer):
 
         num_entries = num_riders * hour_ratio / self._steps_per_hour
         num_entries *= random.uniform(0.8, 1.2)
-        return int(num_entries)
+        return round(num_entries)
 
     async def _produce(self):
         self._producer.produce(

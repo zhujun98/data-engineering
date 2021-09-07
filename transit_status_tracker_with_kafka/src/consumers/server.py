@@ -57,9 +57,10 @@ def process_weather(msg):
 def process_station_table(msg):
     value = json.loads(msg.value())
     line = value["line"]
-    if line in lines:
-        lines[line].stations[value["station_id"]] = Station(
-            value["station_id"], value["station_name"], value["order"]
+    station_id = value["station_id"]
+    if line in lines and station_id not in lines[line].stations:
+        lines[line].stations[station_id] = Station(
+            station_id, value["station_name"], value["order"]
         )
 
 
@@ -68,7 +69,7 @@ def process_turnstile(msg):
     # Caveat: keys are all capital letters from KSQL
     line = value["LINE"]
     try:
-        lines[line].stations[value["STATION_ID"]].turnstile_entries = value["COUNT"]
+        lines[line].stations[value["STATION_ID"]].turnstile_entries += value["COUNT"]
     except KeyError:
         pass
 
