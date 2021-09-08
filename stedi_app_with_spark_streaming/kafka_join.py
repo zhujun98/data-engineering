@@ -23,19 +23,20 @@ if __name__ == "__main__":
     # |Senthil.Abram@tes...| -4.0|Senthil.Abram@tes...| 1958    |
     # |Gail.Lincoln@test...| -3.0|Gail.Lincoln@test...| 1951    |
     # ...
-    # joinedStreamingDF \
-    #     .writeStream \
-    #     .outputMode("append") \
-    #     .format("console") \
-    #     .start() \
-    #     .awaitTermination()
+    write_to_console = joinedStreamingDF \
+        .writeStream \
+        .outputMode("append") \
+        .format("console") \
+        .start()
 
-    joinedStreamingDF\
+    write_to_kafka = joinedStreamingDF\
         .selectExpr("CAST(customer AS STRING) AS key", "to_json(struct(*)) AS value")\
         .writeStream\
         .format("kafka") \
         .option("kafka.bootstrap.servers", "kafka:19092")\
         .option("topic", "customer-risk")\
         .option("checkpointLocation", "/tmp/kafkacheckpoint")\
-        .start()\
-        .awaitTermination()
+        .start()
+
+    write_to_console.awaitTermination()
+    write_to_kafka.awaitTermination()
