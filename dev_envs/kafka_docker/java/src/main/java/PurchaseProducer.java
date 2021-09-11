@@ -1,4 +1,6 @@
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -15,7 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 
-public class Producer
+public class PurchaseProducer
 {
     public static void createTopic(String topicName, Properties config) {
         NewTopic topic = new NewTopic(topicName, Optional.empty(), Optional.empty());
@@ -34,8 +36,22 @@ public class Producer
     {
         Properties cfg = loadConfig();
 
-        createTopic("purchase", cfg);
+        // key.serializer and value.serializer both have no default values..
+        cfg.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.StringSerializer");
+        cfg.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.StringSerializer");
 
+        String topicName = "purchase";
+        createTopic(topicName, cfg);
+
+        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(cfg);
+        System.out.printf("Start producing records for topic: %s%n", topicName);
+        producer.send(new ProducerRecord<String, String>(topicName, "key", "value"));
+
+        producer.flush();
+        System.out.printf("Produced 1 message for topic: %s%n", topicName);
+        producer.close();
     }
 
     public static Properties loadConfig() throws IOException {
