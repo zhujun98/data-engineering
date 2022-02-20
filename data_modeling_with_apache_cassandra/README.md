@@ -29,8 +29,7 @@ event_data/2018-11-09-events.csv
 ## Installing dependencies
 
 ```sh
-pip install pandas cassandra-drive
-
+pip install pandas cassandra-driver
 ```
 
 ## Running Cassandra locally

@@ -79,6 +79,14 @@ A star schema is employed to facilitate queries on song play analysis.
 pip install pandas psycopg2
 ```
 
+or 
+
+```sh
+conda install pandas psycopg2
+```
+on MacOS M1.
+
+
 ## Running Postgres locally
 
 ```sh
@@ -92,11 +100,17 @@ docker run --name postgres-server -e POSTGRES_PASSWORD=student -e POSTGRES_USER=
 docker start <CONTAINER ID>
 ```
 
+
 ## Getting started
 
 Create tables in the `sparkifydb` database. The old tables will be dropped.
 ```sh
 python create_tables.py
+```
+
+One can list all the tables using the following query
+```
+SELECT table_schema,table_name FROM information_schema.tables WHERE (table_schema='public');
 ```
 
 Read and process files from `song_data` and `log_data`, and then load them
