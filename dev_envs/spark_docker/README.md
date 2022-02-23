@@ -8,6 +8,11 @@
 
 ## Run Spark cluster locally
 
+Make sure `LOCAL_WORKSPACE` in `.env` is correct.
+
+**Caveat**: You will need to run `docker volume rm spark_docker_shared-workspace` after modifying
+            `LOCAL_WORKSPACE` in order to make the change take effect.
+
 Start the Spark cluster
 ```sh
 docker-compose up

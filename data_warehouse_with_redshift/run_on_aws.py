@@ -90,7 +90,7 @@ def create_redshift_cluster():
             raise e
 
     # Wait until the status of the cluster becomes 'available'.
-    print("Creating Redshift cluster ...")
+    print(f"Creating Redshift cluster on {s3_config['REGION']} ...")
     while True:
         info = redshift_client.describe_clusters(ClusterIdentifier=identifier)[
             'Clusters'][0]
