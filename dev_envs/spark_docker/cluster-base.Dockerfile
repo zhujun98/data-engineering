@@ -1,5 +1,6 @@
-ARG DEBIAN_BUSTER_IMAGE_TAG=8-jre-slim
-FROM openjdk:${DEBIAN_BUSTER_IMAGE_TAG}
+ARG DEBIAN_IMAGE_TAG
+
+FROM openjdk:${DEBIAN_IMAGE_TAG}
 
 # -- Layer: OS + Python 3.7
 

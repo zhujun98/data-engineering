@@ -3,7 +3,8 @@ FROM spark-local-cluster-base
 ARG SPARK_VERSION
 ARG HADOOP_VERSION
 
-ENV SPARK_HOME=/usr/bin/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
+ENV SPARK_HOME=/opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
+ENV PATH=${SPARK_HOME}/bin:${PATH}
 ENV SPARK_MASTER_HOST=spark-master
 ENV SPARK_MASTER_PORT=7077
 ENV SPARK_MASTER_WEBUI_PORT=8080
@@ -14,7 +15,7 @@ RUN apt-get update -y && \
     apt-get install -y curl && \
     curl https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz -o spark.tgz && \
     tar -xvzf spark.tgz && \
-    mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /usr/bin/ && \
+    mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /opt/ && \
     mkdir ${SPARK_HOME}/logs && \
     rm spark.tgz
 

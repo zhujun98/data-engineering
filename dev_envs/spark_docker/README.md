@@ -6,6 +6,27 @@
 ./build.sh
 ```
 
+Image hierarchy:
+```sh
+                            spark-master
+                           /
+                spark-base
+              /            \
+             /              spark-worker
+cluster-base
+             \          python-app
+              \        /
+                pyspark
+                       \
+                        jupyterlab
+
+      java-app
+     /
+maven
+     \
+      scala-app
+```
+
 ## Run Spark cluster locally
 
 Make sure `LOCAL_WORKSPACE` in `.env` is correct.
@@ -28,6 +49,6 @@ docker-compose down
 
 ## Launch a Spark application
 
-* [Python example](spark-submit/python-app)
-* [Java example](spark-submit/java-app)
-* [Scala example](spark-submit/scala-app)
+* [Python example](./python-app)
+* [Java example](./java-app)
+* [Scala example](./scala-app)

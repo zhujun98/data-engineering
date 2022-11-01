@@ -1,4 +1,4 @@
-FROM spark-local-pyspark-base
+FROM spark-local-pyspark
 
 ARG JUPYTERLAB_VERSION
 
