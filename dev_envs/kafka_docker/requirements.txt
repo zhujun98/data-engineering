@@ -1,4 +1,0 @@
-faker
-confluent-kafka
-avro
-faust
