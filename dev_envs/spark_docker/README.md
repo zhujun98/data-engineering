@@ -8,23 +8,21 @@
 
 Image hierarchy:
 ```sh
-                            spark-master
+                                     java-app
+                                    /
+                               maven
+                             /      \
+                            /        scala-app
                            /
-                spark-base
-              /            \
-             /              spark-worker
+                spark-base - spark-master
+              /            \ 
+             /               spark-worker
 cluster-base
-             \          python-app
+             \           python-app
               \        /
                 pyspark
                        \
-                        jupyterlab
-
-      java-app
-     /
-maven
-     \
-      scala-app
+                         jupyterlab
 ```
 
 ## Run Spark cluster locally
