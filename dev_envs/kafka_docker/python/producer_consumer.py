@@ -163,7 +163,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
-    config.read(osp.join(osp.dirname(__file__), '..', 'config.ini'))
+    config.read(osp.join(osp.dirname(__file__), 'config.ini'))
 
     BROKER_URL = config['CLUSTER']['BROKER_URL']
     TOPIC = config['TOPIC1']['NAME']

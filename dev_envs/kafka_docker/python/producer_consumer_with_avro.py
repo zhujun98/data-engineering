@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import configparser
 from dataclasses import asdict, dataclass, field
@@ -74,7 +75,7 @@ async def produce(broker_url, topic, schema_registry_url, *, num_messages):
             value=asdict(ClickEvent()),
             value_schema=ClickEvent.schema
         )
-        await asyncio.sleep(1.0)
+        await asyncio.sleep(0.01)
 
 
 async def consume(broker_url, topic, schema_registry_url):
@@ -96,12 +97,18 @@ async def consume(broker_url, topic, schema_registry_url):
                 print(message.value())
             except KeyError as e:
                 print(f"Failed to unpack message {e}")
-        await asyncio.sleep(1.0)
+        await asyncio.sleep(0.01)
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="kafka-producer-consumer")
+
+    parser.add_argument('--produce', type=int, default=1000)
+
+    args = parser.parse_args()
+
     config = configparser.ConfigParser()
-    config.read(osp.join(osp.dirname(__file__), '..', 'config.ini'))
+    config.read(osp.join(osp.dirname(__file__), 'config.ini'))
 
     BROKER_URL = config['CLUSTER']['BROKER_URL']
     SCHEMA_REGISTRY_URL = config['CLUSTER']['SCHEMA_REGISTRY_URL']
@@ -109,8 +116,7 @@ if __name__ == "__main__":
     # Note: Topic will be automatically create if not existing yet.
     TOPIC = config['TOPIC2']['NAME']
 
-    n_msgs = 1000
     asyncio.run(asyncio.wait([
-        produce(BROKER_URL, TOPIC, SCHEMA_REGISTRY_URL, num_messages=n_msgs),
+        produce(BROKER_URL, TOPIC, SCHEMA_REGISTRY_URL, num_messages=args.produce),
         consume(BROKER_URL, TOPIC, SCHEMA_REGISTRY_URL)
     ]))
