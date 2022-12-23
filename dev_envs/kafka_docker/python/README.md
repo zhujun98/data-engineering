@@ -15,20 +15,20 @@ pip install -r requirements.txt
 
 ```sh
 # terminal 1
-python producer_consumer.py --sync
+python example.py --sync
 # terminal 2
-python producer_consumer.py --produce 5000 --sync
+python example.py --produce 5000 --sync
 ```
 
 ### Asynchronous producer and consumer:
 
 ```sh
 # starting both the producer and consumer
-python producer_consumer.py --produce 5000
+python example.py --produce 5000
 ```
 
 , or with Avro schema:
 
 ```sh
-python producer_consumer_with_avro.py --produce 5000
+python example_with_avro.py --produce 5000
 ```

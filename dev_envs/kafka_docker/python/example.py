@@ -85,6 +85,7 @@ async def consume(broker_url, topic, batch_size=1, timeout=0.1, *, partitions):
     consume_func = functools.partial(c.consume, batch_size, timeout=timeout)
     loop = asyncio.get_running_loop()
     try:
+        counter = 0
         while True:
             msgs = await loop.run_in_executor(None, consume_func)
             if len(msgs) > 0:
@@ -92,7 +93,8 @@ async def consume(broker_url, topic, batch_size=1, timeout=0.1, *, partitions):
                 assert (msg0.topic() == topic)
                 assert (msg0.key() is None)
                 assert (0 <= msg0.partition() <= partitions)
-                print(f"Received {len(msgs)} messages, "
+                counter += len(msgs)
+                print(f"Received {counter} messages, "
                       f"the first message: {json.loads(msg0.value())}")
             await asyncio.sleep(0.001)
     finally:
