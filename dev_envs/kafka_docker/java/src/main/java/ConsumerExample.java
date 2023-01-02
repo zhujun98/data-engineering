@@ -4,22 +4,22 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
+import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
-public class ConsumerExample {
+public class ConsumerExample extends ClientBase {
 
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) throws IOException {
         if (args.length != 1) {
             System.out.println("Please provide the configuration file path as a command line argument");
             System.exit(1);
         }
 
-        final String topic = "purchase";
+        final String topic = "purchases-java";
 
-        // Load consumer configuration settings from a local file
-        // Reusing the loadConfig method from the ProducerExample class
+        // Load consumer configuration settings from a local file (throws IOException).
         final Properties props = ProducerExample.loadConfig(args[0]);
 
         // Add additional properties.
@@ -27,14 +27,13 @@ public class ConsumerExample {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         try (final Consumer<String, String> consumer = new KafkaConsumer<>(props)) {
-            consumer.subscribe(Arrays.asList(topic));
+            consumer.subscribe(List.of(topic));
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                 for (ConsumerRecord<String, String> record : records) {
                     String key = record.key();
                     String value = record.value();
-                    System.out.println(
-                            String.format("Consumed event from topic %s: key = %-10s value = %s", topic, key, value));
+                    System.out.printf("Consumed event from topic %s: key = %-10s value = %s%n", topic, key, value);
                 }
             }
         }

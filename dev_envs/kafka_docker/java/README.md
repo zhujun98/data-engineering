@@ -6,6 +6,12 @@
 mvn compile
 ```
 
+Create the topic `purchases-java`:
+```sh
+docker exec broker kafka-topics --bootstrap-server localhost:29092 --create --replication-factor 1 --partitions 2 --topic purchases-java
+```
+```
+
 ### Synchronous producer and consumer:
 
 ```sh
