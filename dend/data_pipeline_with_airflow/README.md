@@ -41,7 +41,7 @@ into the `Redshift query editor` in the AWS web console.
 
 ### Running Apache Airflow in Docker
 
-Copy the [Docker Compose file](../dev_envs/airflow_docker/docker-compose.yaml)
+Copy the [Docker Compose file](../../dev_envs/airflow_docker/docker-compose.yaml)
 to the current directory and start Airflow server by
 ```sh
 docker-compose up
@@ -51,7 +51,7 @@ docker-compose up
 
 Create two connections `aws_credentials` and `redshift` by following the steps 
 in `aws_s3_to_redshift.py` and `connections_and_hooks.py` 
-[here](../dev_envs/airflow_docker/dags), respectively.
+[here](../../dev_envs/airflow_docker/dags), respectively.
 
 ### Run the DAG
 
