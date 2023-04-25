@@ -5,8 +5,6 @@
 ```sh
 conda create -n kafka --python=3.9.12
 conda activate kafka
-
-conda activate kafka
 cd python
 pip install -r requirements.txt
 ```
