@@ -71,8 +71,8 @@ Details can be found in the Jupyter notebook
 
 #### Setting up a Spark cluster locally (optional)
 
-Check the Docker Compose file [here](../dev_envs/spark_docker). Remember to change
-the `WORKSPACE` in the [env](../dev_envs/spark_docker/.env) file to the `workspace`
+Check the Docker Compose file [here](../../dev_envs/spark_docker). Remember to change
+the `WORKSPACE` in the [env](../../dev_envs/spark_docker/.env) file to the `workspace`
 in the current directory.
 
 
@@ -183,7 +183,7 @@ python redshift/start_db_on_redshift.py
 
 ### Run Apache Airflow in Docker
 
-Copy the [Docker Compose file](../dev_envs/airflow_docker/docker-compose.yaml)
+Copy the [Docker Compose file](../../dev_envs/airflow_docker/docker-compose.yaml)
 into the `airflow` directory and start Airflow server by
 ```sh
 cd airflow

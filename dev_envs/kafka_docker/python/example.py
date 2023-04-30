@@ -5,8 +5,8 @@ from dataclasses import dataclass, field
 import functools
 import json
 import os.path as osp
-import socket
 import random
+import socket
 import time
 
 from confluent_kafka import Consumer, Producer, KafkaError, KafkaException

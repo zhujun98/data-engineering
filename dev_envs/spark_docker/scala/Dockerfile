@@ -1,6 +1,6 @@
 FROM spark-local-maven
 
-COPY ./app /app/
+COPY scala-app /app/
 
 WORKDIR /app
 

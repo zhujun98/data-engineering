@@ -1,6 +1,6 @@
 FROM spark-local-pyspark
 
-COPY ./app /app/
+COPY python-app /app/
 
 WORKDIR /app
 
