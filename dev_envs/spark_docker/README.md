@@ -47,6 +47,6 @@ docker-compose down
 
 ## Launch a Spark application
 
-* [Python example](./python-app)
-* [Java example](./java-app)
-* [Scala example](./scala-app)
+* [Python example](./python)
+* [Java example](./java)
+* [Scala example](./scala)
